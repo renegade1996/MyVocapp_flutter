@@ -152,6 +152,7 @@ class LoginPageState extends State<LoginPage>
       width: 300,
       child: TextField
       (
+        controller: controller,
         decoration: InputDecoration
         (
           labelText: labelText,

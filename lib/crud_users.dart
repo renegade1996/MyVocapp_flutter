@@ -1,38 +1,32 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class CRUDUsers {
+class CRUDUsers 
+{
   final String url = 'http://192.168.1.84/api_PI/';
 
   // Método para verificar las credenciales
   Future<bool> verifyCredentials(String username, String password) async 
   {
-    try 
-    {
-      final response = await http.post
-      (
-        Uri.parse('$url/login.php'),
-        headers: { 'Content-Type': 'application/json'},
-        body: jsonEncode({'nombreUsuario': username, 'claveUsuario': password}),
-      );
+    final response = await http.post
+    (
+      Uri.parse('$url/login.php'),
+      headers: { 'Content-Type': 'application/json'},
+      body: jsonEncode({'nombreUsuario': username, 'claveUsuario': password}),
+    );
+
     // Si la respuesta es 200 (OK)
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200) 
+    {
       final responseData = json.decode(response.body); // parsear respuesta a json
       // Si tiene mensaje de success devuelve true
-      if (responseData.containsKey('message') && responseData['message'] == 'Successful login') 
+      if (responseData.containsKey('message') && responseData['message'] == 'login success') 
       {
         return true;
       }
     }
-    // Si no, false
     return false;
   } 
-  catch (e) 
-  {
-    print('Error verifying credentials: $e');
-    return false;
-  }
-}
 
   // Método para crear un nuevo usuario si no existe ya ese nombre de usuario
   Future<bool> createUserIfNotExists(String username, String password) async 
@@ -75,7 +69,6 @@ class CRUDUsers {
     } 
     else // error verificación
     {
-      print("Unexpected error: ${verifyResponse.statusCode}");
       return false;
     }
   }
