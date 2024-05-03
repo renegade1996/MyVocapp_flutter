@@ -5,7 +5,9 @@ import 'login.dart';
 
 class Dictionaries extends StatefulWidget 
 {
-  const Dictionaries({super.key});
+  // id de usuario pasado desde login
+  final int userId;
+  const Dictionaries({super.key, required this.userId});
 
   @override
   DictionariesState createState() => DictionariesState();
@@ -15,8 +17,8 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
 {
   int _currentIndex = 0; // index 0 -> diccionarios, index 1 -> juegos
 
-  // Lista de diccionarios
-  List<String> dictionaryItems = [];
+  // Lista de diccionarios (clase pojo al final)
+  List<Dictionary> dictionaryItems = [];
 
   @override
   void initState() 
@@ -34,9 +36,8 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
       (
         title: _currentIndex == 1 ? 
           const Text("Games", style: TextStyle(color: Colors.white)) : const Text("Dictionaries", style: TextStyle(color: Colors.white)),
-        
+        automaticallyImplyLeading: false, // sin flecha de retroceder
         backgroundColor: Colors.black,
-
         actions: 
         [
           IconButton // botón se salir
@@ -118,13 +119,13 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               (
                 onLongPress: () 
                 {
-                  _showEditDialog(dictionaryItems[index]);
+                  _showEditDialog(dictionaryItems[index]._id, dictionaryItems[index]._name);
                 },
                 child: Card
                 (
                   child: ListTile
                   (
-                    title: Text(dictionaryItems[index]),
+                    title: Text(dictionaryItems[index]._name),
                  )
                 ),
               );
@@ -158,159 +159,188 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
     });
   }
 
-void _showEditDialog(String dictionaryName) 
-{
-    showDialog
-    (
-      context: context,
-      builder: (BuildContext context) 
-      {
-        return AlertDialog
-        (
-          title: const Text("Edit Dictionary Name:"),
-          content: TextField
+  void _showEditDialog(int dictionaryId, String dictionaryName) 
+  {
+    TextEditingController controller = TextEditingController(text: dictionaryName);
+
+      showDialog
+      (
+        context: context,
+        builder: (BuildContext context) 
+        {
+          return AlertDialog
           (
-            decoration: const InputDecoration
+            title: const Text("Edit Dictionary Name:"),
+            content: TextField
             (
-              hintText: "Enter dictionary name",
-            ),
-            controller: TextEditingController(text: dictionaryName),
-          ),
-          actions: 
-          [
-            ElevatedButton
-            (
-              onPressed: () 
-              {
-                // Acción para editar diccionario
-                // Por ahora solo imprime nombre
-                print("Editing dictionary: $dictionaryName");
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
-            ),
-            ElevatedButton
-            (
-              onPressed: () 
-              {
-                _showDeleteConfirmationDialog(dictionaryName);
-              },
-              style: ButtonStyle
+              decoration: const InputDecoration
               (
-                backgroundColor: MaterialStateProperty.all(Colors.red),
+                hintText: "Enter dictionary name",
               ),
-              child: const Text
+              controller: controller,
+            ),
+            actions: 
+            [
+              ElevatedButton
               (
-                "Delete Dictionary",
-                style: TextStyle(color: Colors.white),
+                onPressed: () 
+                {
+                  // Editar diccionario
+                  String newName = controller.text;
+                  debugPrint('$dictionaryId - $dictionaryName to $newName');
+                  
+                  CRUDdictionaries().updateDictionaryName(dictionaryId, newName).then((_) { fillDictionaryItems(); }); // usamos then para esperar al método crud asíncrono y después actualizar la lista
+                                  
+                  Navigator.of(context).pop();
+                },
+                child: const Text("OK"),
               ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+              ElevatedButton
+              (
+                onPressed: () 
+                {
+                  _showDeleteConfirmationDialog(dictionaryName);
+                },
+                style: ButtonStyle
+                (
+                  backgroundColor: MaterialStateProperty.all(Colors.red),
+                ),
+                child: const Text
+                (
+                  "Delete Dictionary",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
 
-  void _showDeleteConfirmationDialog(String dictionaryName) 
-  {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) 
-      {
-        return AlertDialog(
-          title: Text("Confirm Delete"),
-          content: Text("Are you sure you want to PERMANENTLY DELETE $dictionaryName?"),
-          actions: 
-          [
-            ElevatedButton
-            (
-              onPressed: () 
-              {
-                // Acción borrar diccionario
-                // Por ahora solo imprime nombre
-                print("Deleting dictionary: $dictionaryName");
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              },
-              child: Text("Yes"),
-            ),
-            ElevatedButton
-            (
-              onPressed: () 
-              {
-                Navigator.of(context).pop();
-              },
-              child: Text("No"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAddDictionaryDialog() 
-  {
-    String newDictionaryName = '';
-
-    showDialog
-    (
-      context: context,
-      builder: (BuildContext context) 
-      {
-        return AlertDialog
-        (
-          title: const Text("New Dictionary"),
-          content: TextField
-          (
-            decoration: const InputDecoration
-            (
-              hintText: "Enter dictionary name",
-            ),
-            onChanged: (value) 
-            {
-              newDictionaryName = value;
-            },
-          ),
-          actions: 
-          [
-            ElevatedButton
-            (
-              onPressed: ()
-              {
-                // Acción para añadir el nuevo diccionario
-                // Por ahora solo imprime el nombre 
-                print("Adding new dictionary: $newDictionaryName");
-                Navigator.of(context).pop();
-              },
-              child: const Text("OK"),
-            ),
-            ElevatedButton
-            (
-              onPressed: () 
-              {
-                Navigator.of(context).pop();
-              },
-              child: const Text("Cancel"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void fillDictionaryItems() async 
-  {
-    try 
+    void _showDeleteConfirmationDialog(String dictionaryName) 
     {
-      List<dynamic> dictionaries = await CRUDdictionaries().getAllDictionaries();
-      setState(() 
+      showDialog(
+        context: context,
+        builder: (BuildContext context) 
+        {
+          return AlertDialog(
+            title: Text("Confirm Delete"),
+            content: Text("Are you sure you want to PERMANENTLY DELETE $dictionaryName?"),
+            actions: 
+            [
+              ElevatedButton
+              (
+                onPressed: () 
+                {
+                  // Borrar diccionario
+                  // Por ahora solo imprime nombre
+                  print("Deleting dictionary: $dictionaryName");
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: Text("Yes"),
+              ),
+              ElevatedButton
+              (
+                onPressed: () 
+                {
+                  Navigator.of(context).pop();
+                },
+                child: Text("No"),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    void _showAddDictionaryDialog() 
+    {
+      String newDictionaryName = '';
+
+      showDialog
+      (
+        context: context,
+        builder: (BuildContext context) 
+        {
+          return AlertDialog
+          (
+            title: const Text("New Dictionary"),
+            content: TextField
+            (
+              decoration: const InputDecoration
+              (
+                hintText: "Enter dictionary name",
+              ),
+              onChanged: (value) 
+              {
+                newDictionaryName = value;
+              },
+            ),
+            actions: 
+            [
+              ElevatedButton
+              (
+                onPressed: ()
+                {
+                  // Añadir el nuevo diccionario
+                  debugPrint("Adding new dictionary: $newDictionaryName for user $widget.userId");
+                  CRUDdictionaries().createDictionary(newDictionaryName, widget.userId);
+                  // Actualizar la lista de diccionarios después de agregar uno nuevo
+                  fillDictionaryItems();
+
+                  Navigator.of(context).pop();
+                },
+                child: const Text("OK"),
+              ),
+              ElevatedButton
+              (
+                onPressed: () 
+                {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    void fillDictionaryItems() async 
+    {
+      try 
       {
-        dictionaryItems = dictionaries.map((dictionary) => dictionary['nombreDiccionario'] as String).toList();
+        List<dynamic> dictionaries = await CRUDdictionaries().getDictionaries(widget.userId);
+        setState(() 
+        {
+          // Mapear lista
+          dictionaryItems = dictionaries.map((dictionary) => Dictionary
+          (
+            id: dictionary['idDiccionario'], 
+            name: dictionary['nombreDiccionario'],
+          )).toList();
       });
     } 
     catch (e) 
     {
-      print('Error al obtener los diccionarios: $e');
+      debugPrint('Error al obtener los diccionarios: $e');
     }
   }
+}
+// clase pojo para diccionario
+class Dictionary 
+{
+  final int _id;
+  final String _name;
+
+  Dictionary({required int id, required String name})
+      : _id = id,
+        _name = name;
+
+  // Getter de idDiccionario
+  int get id => _id;
+
+  // Getter de nombreDiccionario
+  String get name => _name;
 }

@@ -72,4 +72,32 @@ class CRUDUsers
       return false;
     }
   }
+
+  // Método para obtener el ID de un usuario al iniciar sesión
+Future<int> getUserId(String username) async 
+{
+  final response = await http.get
+  (
+    Uri.parse('$url/usuarios.php?nombreUsuario=$username'),
+  );
+
+  if (response.statusCode == 200) 
+  {
+    final responseData = json.decode(response.body);
+
+    // Verificar si el usuario fue encontrado
+    if (responseData.containsKey('data')) 
+    {
+      final userData = responseData['data'];
+      
+      // Verificar si se encontró el usuario y se devolvió su ID
+      if (userData.containsKey('idUsuario')) 
+      {
+        return int.parse(userData['idUsuario'].toString());
+      }
+    }
+  }
+    // Si no se encuentra el usuario o no se devuelve un ID, devuelve -1
+    return -1;
+  }
 }

@@ -22,14 +22,38 @@ class Login extends StatelessWidget
         } 
         else 
         {
-          if (snapshot.data == true) 
-          {
-            return Dictionaries(); // Si el usuario ya ha iniciado sesión previamente, navega directamente a la pantalla de Dictionaries.
-          } 
-          else 
-          {
-            return const LoginPage(); // Si no, muestra la pantalla de inicio de sesión.
-          }
+          // Función para manejar el caso cuando el usuario ya está autenticado (guardado en sharedPreferences)
+          return _buildLoginWidget(snapshot.data);
+        }
+      },
+    );
+  }
+  Widget _buildLoginWidget(bool? isLoggedIn) 
+  {
+    if (isLoggedIn == true) 
+    {
+      return _buildDictionariesWidget(); 
+    } 
+    else 
+    {
+      return const LoginPage();
+    }
+  }
+Widget _buildDictionariesWidget() 
+{
+    return FutureBuilder<int>
+    (
+      future: _getUserId(), // función para obtener el id del usuario al autenticarse correctamente
+      builder: (context, snapshot) 
+      {
+        if (snapshot.connectionState == ConnectionState.waiting)
+         {
+          return const CircularProgressIndicator();
+        } 
+        else 
+        {
+          int userId = snapshot.data ?? -1;
+          return Dictionaries(userId: userId);
         }
       },
     );
@@ -39,6 +63,11 @@ class Login extends StatelessWidget
   {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('isLoggedIn') ?? false; // Devuelve true si el usuario está autenticado, false de lo contrario.
+  }
+  Future<int> _getUserId() async 
+  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('userId') ?? -1;
   }
 }
 
@@ -100,15 +129,22 @@ class LoginPageState extends State<LoginPage>
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       await prefs.setBool('isLoggedIn', true);
 
+                      // Obtenemos el ID del usuario
+                      int userId = await CRUDUsers().getUserId(username);
+                      
+                      // Guardamos el ID en SharedPreferences
+                      await prefs.setInt('userId', userId);
+
                       // Navegamos a la clase Dictionaries
                       Navigator.push
                       (
                         context,
                         MaterialPageRoute
                         (
-                          builder: (context) => Dictionaries(), 
+                          builder: (context) => Dictionaries(userId: userId), // pasamos el id
                         ),
                       );
+                      debugPrint('Logged-user ID: $userId');
                     } 
                     else 
                     {
