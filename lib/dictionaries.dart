@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'crud_dictionaries.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
+import 'entries.dart';
 
 class Dictionaries extends StatefulWidget 
 {
@@ -40,23 +41,49 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
         backgroundColor: Colors.black,
         actions: 
         [
-          IconButton // botón se salir
-          (
-            icon: const Icon(Icons.exit_to_app, color: Colors.red),
-            onPressed: () async 
-            {
-              // Limpiar los datos de Shared Preferences
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.setBool('isLoggedIn', false);
-
-              // Navegar de regreso a la pantalla de inicio de sesión
-              Navigator.pushReplacement
+        PopupMenuButton(
+          icon: const Icon(Icons.settings),
+          itemBuilder: (BuildContext context) => <PopupMenuEntry>
+          [
+            PopupMenuItem(
+              child: const Row
               (
-                context,
-                MaterialPageRoute(builder: (context) => Login()),
-              );
-            },
-          ),
+                children: 
+                [
+                  Icon(Icons.settings),
+                  SizedBox(width: 8),
+                  Text('Account'),
+                ],
+              ),
+              onTap: () 
+              {
+                // hacer dialogo para cambiar nombre de cuenta y contraseña
+              },
+            ),
+            PopupMenuItem
+            (
+              child: const Row
+              (
+                children: 
+                [
+                  Icon(Icons.exit_to_app),
+                  SizedBox(width: 8),
+                  Text('Log out'),
+                ],
+              ),
+              onTap: () async 
+              {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('isLoggedIn', false);
+                Navigator.pushReplacement
+                (
+                  context,
+                  MaterialPageRoute(builder: (context) => const Login()),
+                );
+              },
+            ),
+          ],
+        ),
         ],
       ),
       body: _getCurrentTab(), // cuerpo
@@ -117,6 +144,20 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
             {
               return GestureDetector
               (
+                onTap: ()
+                {
+                  Navigator.push
+                  (
+                    context,
+                    MaterialPageRoute
+                    (
+                      builder: (context) => Entries
+                      (
+                        dictionaryName: dictionaryItems[index].name,
+                      ),
+                    ),
+                  );
+                },
                 onLongPress: () 
                 {
                   _showEditDialog(dictionaryItems[index]._id, dictionaryItems[index]._name);
@@ -161,14 +202,14 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
 
   void _showEditDialog(int dictionaryId, String dictionaryName) 
   {
-    TextEditingController controller = TextEditingController(text: dictionaryName);
-
-      showDialog
-      (
-        context: context,
-        builder: (BuildContext context) 
-        {
-          return AlertDialog
+    TextEditingController controller = TextEditingController(text: dictionaryName); // Controlador para el campo de texto
+    
+    showDialog
+    (
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog
           (
             title: const Text("Edit Dictionary Name:"),
             content: TextField
@@ -177,7 +218,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               (
                 hintText: "Enter dictionary name",
               ),
-              controller: controller,
+             controller: controller,
             ),
             actions: 
             [
@@ -185,12 +226,14 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               (
                 onPressed: () 
                 {
-                  // Editar diccionario
-                  String newName = controller.text;
-                  debugPrint('$dictionaryId - $dictionaryName to $newName');
+                  String newDictionaryName = controller.text.trim();
                   
-                  CRUDdictionaries().updateDictionaryName(dictionaryId, newName).then((_) { fillDictionaryItems(); }); // usamos then para esperar al método crud asíncrono y después actualizar la lista
-                                  
+                  if(newDictionaryName != "") // si tiene algo escrito -> Editar diccionario
+                  {
+                    debugPrint('$dictionaryId - $dictionaryName to $newDictionaryName');
+                    
+                    CRUDdictionaries().updateDictionaryName(dictionaryId, newDictionaryName).then((_) { fillDictionaryItems(); }); // usamos then para esperar al método crud asíncrono y después actualizar la lista
+                  }
                   Navigator.of(context).pop();
                 },
                 child: const Text("OK"),
@@ -199,54 +242,9 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               (
                 onPressed: () 
                 {
-                  _showDeleteConfirmationDialog(dictionaryName);
-                },
-                style: ButtonStyle
-                (
-                  backgroundColor: MaterialStateProperty.all(Colors.red),
-                ),
-                child: const Text
-                (
-                  "Delete Dictionary",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    }
-
-    void _showDeleteConfirmationDialog(String dictionaryName) 
-    {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) 
-        {
-          return AlertDialog(
-            title: Text("Confirm Delete"),
-            content: Text("Are you sure you want to PERMANENTLY DELETE $dictionaryName?"),
-            actions: 
-            [
-              ElevatedButton
-              (
-                onPressed: () 
-                {
-                  // Borrar diccionario
-                  // Por ahora solo imprime nombre
-                  print("Deleting dictionary: $dictionaryName");
-                  Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
-                child: Text("Yes"),
-              ),
-              ElevatedButton
-              (
-                onPressed: () 
-                {
-                  Navigator.of(context).pop();
-                },
-                child: Text("No"),
+                child: const Text("Cancel"),
               ),
             ],
           );
@@ -274,21 +272,24 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               ),
               onChanged: (value) 
               {
-                newDictionaryName = value;
+                setState(() 
+                {
+                  newDictionaryName = value.trim();
+                });
               },
             ),
             actions: 
             [
               ElevatedButton
               (
-                onPressed: ()
+                onPressed: () 
                 {
-                  // Añadir el nuevo diccionario
-                  debugPrint("Adding new dictionary: $newDictionaryName for user $widget.userId");
-                  CRUDdictionaries().createDictionary(newDictionaryName, widget.userId);
-                  // Actualizar la lista de diccionarios después de agregar uno nuevo
-                  fillDictionaryItems();
-
+                  if(newDictionaryName != "")
+                  {
+                    // Añadir el nuevo diccionario
+                    debugPrint("Adding new dictionary: $newDictionaryName for user $widget.userId");
+                    CRUDdictionaries().createDictionary(newDictionaryName, widget.userId).then((_) { fillDictionaryItems(); }); // usamos then para esperar al método crud asíncrono y después actualizar la lista
+                  }
                   Navigator.of(context).pop();
                 },
                 child: const Text("OK"),
