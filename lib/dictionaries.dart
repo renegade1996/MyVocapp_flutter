@@ -154,6 +154,8 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                       builder: (context) => Entries
                       (
                         dictionaryName: dictionaryItems[index].name,
+                        userId: widget.userId,
+                        dictionaryId: dictionaryItems[index].id,
                       ),
                     ),
                   );
