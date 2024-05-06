@@ -19,4 +19,30 @@ class CRUDEntries
       throw Exception('Error al obtener los diccionarios');
     }
   }
+  // Método para agregar una nueva entrada
+  Future<Map<String, dynamic>> addEntry(Map<String, dynamic> entryData) async 
+  {
+    final response = await http.post
+    (
+      Uri.parse(url),
+      body: 
+      {
+        'tituloEntrada': entryData['tituloEntrada'].toString(),
+        'descripcionEntrada': entryData['descripcionEntrada'].toString(),
+        'ejemploEntrada': entryData['ejemploEntrada'].toString(),
+        'trucoEntrada': entryData['trucoEntrada'].toString(),
+        'tipoEntrada': entryData['tipoEntrada'] ? '1' : '0'.toString(),
+        'idDiccionarioFK': entryData['idDiccionarioFK'].toString(),
+      },
+    );
+
+    if (response.statusCode == 200) 
+    {
+      return json.decode(response.body);
+    } 
+    else 
+    {
+      throw Exception('Error al agregar la entrada');
+    }
+  }
 }
