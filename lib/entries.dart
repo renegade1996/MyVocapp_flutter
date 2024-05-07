@@ -17,6 +17,7 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
 {
   List<Map<String, dynamic>> entries = [];
   late AnimationController _shakeController;
+  bool isPlayable = false;
 
   @override
   void initState() 
@@ -87,7 +88,7 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
       floatingActionButton: FloatingActionButton
       (
         onPressed: () 
-        {
+        {          
           showDialog
           (
             context: context,
@@ -96,8 +97,10 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
               return NewEntryDialog
               (
                 shakeController: _shakeController,
-                onAddEntry: (newEntry) => _addEntry(newEntry), // Pasar la función addEntry
+                onAddEntry: (newEntry) => _addEntry(newEntry, isPlayable), // Pasar la función addEntry
                 dictionaryId: widget.dictionaryId, // pasar el id del diccionario
+                isPlayable: isPlayable, // Pasar el valor de isPlayable al constructor del NewEntryDialog
+                fillEntriesItems: fillEntriesItems,
               );
             },
           );
@@ -142,13 +145,13 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
       context: context,
       builder: (BuildContext context) 
       {
-        return EditEntryDialog(entry: entry);
+        return EditEntryDialog(entry: entry, fillEntriesItems: fillEntriesItems);
       },
     );
   }
 
   // Método para agregar una nueva entrada a la lista
-  Future<void> _addEntry(Map<String, dynamic> newEntry) async 
+  Future<void> _addEntry(Map<String, dynamic> newEntry, bool isPlayable) async 
   {
     try 
     {
@@ -172,8 +175,10 @@ class NewEntryDialog extends StatefulWidget
   final AnimationController shakeController;
   final Function(Map<String, dynamic>) onAddEntry;
   final int dictionaryId;
+  final bool isPlayable;
+  final Function fillEntriesItems;
 
-  const NewEntryDialog({super.key, required this.shakeController, required this.onAddEntry, required this.dictionaryId});
+  const NewEntryDialog({super.key, required this.shakeController, required this.onAddEntry, required this.dictionaryId, required this.isPlayable, required this.fillEntriesItems});
 
   @override
   NewEntryDialogState createState() => NewEntryDialogState();
@@ -184,7 +189,7 @@ class NewEntryDialogState extends State<NewEntryDialog>
   final TextEditingController _definitionController = TextEditingController();
   final TextEditingController _exampleController = TextEditingController();
   final TextEditingController _tipController = TextEditingController();
-
+  
   @override
   Widget build(BuildContext context) 
   {
@@ -234,24 +239,24 @@ class NewEntryDialogState extends State<NewEntryDialog>
               // Lógica para guardar la entrada
               try 
               {
-              final entryData = 
+                final entryData = 
+                {
+                  'tituloEntrada': _wordController.text,
+                  'descripcionEntrada': _definitionController.text,
+                  'ejemploEntrada': _exampleController.text,
+                  'trucoEntrada': _tipController.text,
+                  'tipoEntrada': widget.isPlayable,
+                  'idDiccionarioFK': widget.dictionaryId,
+                };
+                widget.onAddEntry(entryData); // Llamar a la función onAddEntry
+                Navigator.of(context).pop();
+              } 
+              catch (e) 
               {
-                'tituloEntrada': _wordController.text,
-                'descripcionEntrada': _definitionController.text,
-                'ejemploEntrada': _exampleController.text,
-                'trucoEntrada': _tipController.text,
-                'tipoEntrada': true, // Tipo de entrada
-                'idDiccionarioFK': widget.dictionaryId, // ID del diccionario, tomando widget.dictionaryId de EntriesState
-              };
-              widget.onAddEntry(entryData); // Llamar a la función onAddEntry
-              Navigator.of(context).pop();
-            } 
-            catch (e) 
-            {
-              debugPrint('Error al agregar la entrada: $e');
+                debugPrint('Error al agregar la entrada: $e');
+              }
             }
-          }
-        },
+          },
           child: const Text('Save'),
         ),
         ElevatedButton
@@ -266,7 +271,7 @@ class NewEntryDialogState extends State<NewEntryDialog>
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hintText, [MaterialColor? materialColor]) 
+  Widget _buildTextField(TextEditingController controller, String hintText, [Color? errorColor]) 
   {
     return TextField
     (
@@ -274,6 +279,7 @@ class NewEntryDialogState extends State<NewEntryDialog>
       decoration: InputDecoration
       (
         hintText: hintText,
+        errorText: errorColor != null ? 'Field cannot be empty' : null,
       ),
     );
   }
@@ -337,29 +343,39 @@ class NewEntryDialogState extends State<NewEntryDialog>
 class EditEntryDialog extends StatefulWidget 
 {
   final Map<String, dynamic> entry;
+  final Function fillEntriesItems;
 
-  const EditEntryDialog({Key? key, required this.entry}) : super(key: key);
-
+  const EditEntryDialog({super.key, required this.entry, required this.fillEntriesItems});
   @override
-  _EditEntryDialogState createState() => _EditEntryDialogState();
+  EditEntryDialogState createState() => EditEntryDialogState();
 }
 
-class _EditEntryDialogState extends State<EditEntryDialog> 
+class EditEntryDialogState extends State<EditEntryDialog> 
 {
   final TextEditingController _wordController = TextEditingController();
   final TextEditingController _definitionController = TextEditingController();
   final TextEditingController _exampleController = TextEditingController();
   final TextEditingController _tipController = TextEditingController();
+  bool _isPlayable = false;
 
   @override
   void initState()
   {
     super.initState();
-    // Inicializar los controladores con los valores existentes
+    // Inicializar los controladores con los valores guardados
     _wordController.text = widget.entry['tituloEntrada'] ?? '';
     _definitionController.text = widget.entry['descripcionEntrada'] ?? '';
     _exampleController.text = widget.entry['ejemploEntrada'] ?? '';
     _tipController.text = widget.entry['trucoEntrada'] ?? '';
+    // Configurar el switch para que esté activado si tipoEntrada es true
+    if (widget.entry['tipoEntrada'] != null) 
+    {
+      _isPlayable = widget.entry['tipoEntrada'] == 1;
+    } 
+    else 
+    {
+      _isPlayable = false;
+    }
   }
 
   @override
@@ -381,10 +397,14 @@ class _EditEntryDialogState extends State<EditEntryDialog>
             {
               // Lógica para eliminar la entrada
             },
-            child: const Icon
+            child: IconButton
             (
-              Icons.delete_forever,
+              icon: const Icon(Icons.delete),
               color: Colors.red,
+              onPressed: () 
+              {
+                // Lógica para eliminar entrada
+              },
             ),
           ),
         ],
@@ -403,6 +423,25 @@ class _EditEntryDialogState extends State<EditEntryDialog>
             _buildExampleTextField(_exampleController, 'Example sentence'),
             const SizedBox(height: 8),
             _buildTipTextField(_tipController, 'Tip to remember'),
+            const SizedBox(height: 8),
+            Row
+            (
+              children: 
+              [
+                const Text('PLAYABLE'),
+                Switch
+                (
+                  value: _isPlayable,
+                  onChanged: (value) 
+                  {
+                    setState(() 
+                    {
+                      _isPlayable = value;
+                    });
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -412,7 +451,7 @@ class _EditEntryDialogState extends State<EditEntryDialog>
         (
           onPressed: () 
           {
-            // Lógica para guardar la entrada editada
+            _updateEntry().then((_) { widget.fillEntriesItems(); }); // método para edición y después actualizamos lista
             Navigator.of(context).pop();
           },
           child: const Text('Save'),
@@ -482,6 +521,30 @@ class _EditEntryDialogState extends State<EditEntryDialog>
         ),
       ],
     );
+  }
+  // Método para actualizar la entrada
+  Future<void> _updateEntry() async 
+  {
+    final entryData = 
+    {
+      'idEntrada': widget.entry['idEntrada'],
+      'tituloEntrada': _wordController.text,
+      'descripcionEntrada': _definitionController.text,
+      'ejemploEntrada': _exampleController.text,
+      'trucoEntrada': _tipController.text,
+      'tipoEntrada': _isPlayable ? 1 : 0,
+      'idDiccionarioFK': widget.entry['idDiccionarioFK'],
+    };
+
+    try 
+    {
+      final crudEntries = CRUDEntries();
+      await crudEntries.updateEntry(entryData);
+    } 
+    catch (e) 
+    {
+      debugPrint('Error updating entry: $e');
+    }
   }
 
   @override

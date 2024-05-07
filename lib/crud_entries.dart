@@ -8,7 +8,7 @@ class CRUDEntries
   // Método para obtener todas las entradas de un diccionario concreto
   Future<List<dynamic>> getEntries(int dictionaryId) async 
   {
-    final response = await http.get(Uri.parse('$url/?idDiccionarioFK=$dictionaryId'));
+    final response = await http.get(Uri.parse('$url?idDiccionarioFK=$dictionaryId'));
 
     if (response.statusCode == 200) 
     {
@@ -43,6 +43,29 @@ class CRUDEntries
     else 
     {
       throw Exception('Error al agregar la entrada');
+    }
+  }
+  // Método para actualizar una entrada
+  Future<void> updateEntry(Map<String, dynamic> entryData) async 
+  {
+    final response = await http.put
+    (
+      Uri.parse("$url?idEntrada=$entryData['idEntrada']"),
+      body: 
+      {
+        'idEntrada': entryData['idEntrada'].toString(),
+        'tituloEntrada': entryData['tituloEntrada'],
+        'descripcionEntrada': entryData['descripcionEntrada'],
+        'ejemploEntrada': entryData['ejemploEntrada'],
+        'trucoEntrada': entryData['trucoEntrada'],
+        'tipoEntrada': entryData['tipoEntrada'].toString(),
+        'idDiccionarioFK': entryData['idDiccionarioFK'].toString(),
+      },
+    );
+
+    if (response.statusCode != 200) 
+    {
+      throw Exception('Error al actualizar la entrada');
     }
   }
 }
