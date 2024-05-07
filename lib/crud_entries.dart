@@ -68,4 +68,15 @@ class CRUDEntries
       throw Exception('Error al actualizar la entrada');
     }
   }
+
+  // Método para eliminar una entrada
+  Future<void> deleteEntry(int entryId) async 
+  {
+    final response = await http.delete(Uri.parse('$url?idEntrada=$entryId'));
+
+    if (response.statusCode != 200) 
+    {
+      throw Exception('Error al eliminar la entrada');
+    }
+  }
 }

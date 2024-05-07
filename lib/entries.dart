@@ -403,7 +403,8 @@ class EditEntryDialogState extends State<EditEntryDialog>
               color: Colors.red,
               onPressed: () 
               {
-                // Lógica para eliminar entrada
+                // Diálogo para eliminar entrada
+                _showDeleteConfirmationDialog();
               },
             ),
           ),
@@ -522,6 +523,61 @@ class EditEntryDialogState extends State<EditEntryDialog>
       ],
     );
   }
+
+  // Método para mostrar el diálogo de eliminar entrada
+  void _showDeleteConfirmationDialog() 
+  {
+    showDialog
+    (
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog
+        (
+          title: const Text('Confirm Delete'),
+          content: const Text('Are you sure you want to PERMANENTLY delete this entry from your dictionary and games?'),
+          actions: <Widget>
+          [
+            ElevatedButton
+            (
+              onPressed: () 
+              {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton
+            (
+              onPressed: () 
+              {
+                // borrar entrada en la base de datos 
+                _deleteEntry().then((_) { widget.fillEntriesItems(); });
+
+                Navigator.of(context).pop(); // Cierra el segundo diálogo
+                Navigator.of(context).pop(); // Cierra el primer diálogo            
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Método para borrar la entrada
+  Future<void> _deleteEntry() async 
+  {
+    final crudEntries = CRUDEntries();
+    try 
+    {
+      await crudEntries.deleteEntry(widget.entry['idEntrada']);
+    } 
+    catch (e) 
+    {
+      debugPrint('Error deleting entry: $e');
+    }
+  }
+
   // Método para actualizar la entrada
   Future<void> _updateEntry() async 
   {
