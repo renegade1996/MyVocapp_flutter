@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_flutter_app/crud_dictionaries.dart';
 import 'package:my_flutter_app/crud_entries.dart';
 
 class Entries extends StatefulWidget 
@@ -6,8 +7,9 @@ class Entries extends StatefulWidget
   final String dictionaryName;
   final int userId;
   final int dictionaryId;
+  final Function() onDeleteDictionary;
 
-  const Entries({super.key, required this.dictionaryName, required this.userId, required this.dictionaryId});
+  const Entries({super.key, required this.dictionaryName, required this.userId, required this.dictionaryId, required this.onDeleteDictionary});
 
   @override
   EntriesState createState() => EntriesState();
@@ -16,7 +18,6 @@ class Entries extends StatefulWidget
 class EntriesState extends State<Entries> with TickerProviderStateMixin 
 {
   List<Map<String, dynamic>> entries = [];
-  late AnimationController _shakeController;
   bool isPlayable = false;
 
   @override
@@ -24,7 +25,6 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
   {
     super.initState();
     fillEntriesItems();
-    _shakeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
   }
 
   @override
@@ -51,7 +51,7 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
             icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () 
             {
-              // aquí la lógica para eliminar el diccionario
+              _showDeleteDictionaryDialog();
             },
           ),
         ],
@@ -68,15 +68,21 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
               onTap: () => _showEditDialog(entries[index]),
               child: Card
               (
+                color:const Color.fromARGB(255, 38, 130, 84),
                 child: ListTile
                 (
                   title: Row
                   (
                     children: 
                     [
-                      const Icon(Icons.edit), // Icono de edición
+                      const Icon(Icons.edit, color: Colors.white), // Icono de edición
                       const SizedBox(width: 8), // Espacio entre el icono y el texto
-                      Text(entries[index]['tituloEntrada']), // Título de la entrada
+                      Text(entries[index]['tituloEntrada'],
+                        style: const TextStyle
+                        (
+                          color: Colors.white,
+                        ),
+                      ), // Título de la entrada
                     ],
                   ),
                 ),
@@ -96,7 +102,6 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
             {
               return NewEntryDialog
               (
-                shakeController: _shakeController,
                 onAddEntry: (newEntry) => _addEntry(newEntry, isPlayable), // Pasar la función addEntry
                 dictionaryId: widget.dictionaryId, // pasar el id del diccionario
                 isPlayable: isPlayable, // Pasar el valor de isPlayable al constructor del NewEntryDialog
@@ -108,11 +113,11 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      backgroundColor: Colors.purple[100],
+      backgroundColor: Colors.blue[200],
     );
   }
 
-  // consulta (cards)
+  // método para rellenar las tarjetas con la consulta de entradas (cards)
   void fillEntriesItems() async 
   {
     try 
@@ -130,11 +135,62 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
     }
   }
 
-  @override
-  void dispose() 
+  // Método para borrar un diccionario
+  Future<void> _deleteDictionary() async 
   {
-    _shakeController.dispose();
-    super.dispose();
+    final crudDictionaries = CRUDdictionaries();
+    crudDictionaries.deleteDictionary(widget.dictionaryId)
+    .then((_) 
+    {
+        setState(() 
+        {
+          widget.onDeleteDictionary(); // función callback
+        });
+    })
+    .catchError((error) 
+    {
+        debugPrint('Error deleting dictionary: $error');
+    });
+  }
+
+  // Método para mostrar el diálogo de eliminar DICCIONARIO
+  void _showDeleteDictionaryDialog()
+  {
+    showDialog
+    (
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog
+        (
+          title: const Text('Confirm Delete'),
+          content: const Text('This action will PERMANENTLY DELETE your dictionary AND all of its entries. Are you sure?'),
+          actions: <Widget>
+          [
+            ElevatedButton
+            (
+              onPressed: () 
+              {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton
+            (
+              onPressed: () 
+              {
+                // borrar diccionario y entradas en la base de datos 
+                _deleteDictionary();
+
+                Navigator.of(context).pop(); // Cierra el segundo diálogo
+                Navigator.of(context).pop(); // Cierra el primer diálogo            
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Método para mostrar el diálogo de edición
@@ -172,13 +228,12 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
 // clase para diálogo de nueva entrada
 class NewEntryDialog extends StatefulWidget 
 {
-  final AnimationController shakeController;
   final Function(Map<String, dynamic>) onAddEntry;
   final int dictionaryId;
   final bool isPlayable;
   final Function fillEntriesItems;
 
-  const NewEntryDialog({super.key, required this.shakeController, required this.onAddEntry, required this.dictionaryId, required this.isPlayable, required this.fillEntriesItems});
+  const NewEntryDialog({super.key, required this.onAddEntry, required this.dictionaryId, required this.isPlayable, required this.fillEntriesItems});
 
   @override
   NewEntryDialogState createState() => NewEntryDialogState();
@@ -203,18 +258,8 @@ class NewEntryDialogState extends State<NewEntryDialog>
           mainAxisSize: MainAxisSize.min,
           children: 
           [
-            AnimatedBuilder
-            (
-              animation: widget.shakeController,
-              builder: (BuildContext context, Widget? child) 
-              {
-                return Transform.translate
-                (
-                  offset: Offset(widget.shakeController.value, 0),
-                  child: _buildTextField(_wordController, 'Word or expression', (_wordController.text.isEmpty ? Colors.red : Colors.transparent) as MaterialColor?), // Cambio en el color del texto
-                );
-              },
-            ),
+            const SizedBox(height: 8),
+            _buildTextField(_wordController, 'Word or expression'),
             const SizedBox(height: 8),
             _buildTextField(_definitionController, 'Definition or translation'),
             const SizedBox(height: 8),
@@ -230,13 +275,9 @@ class NewEntryDialogState extends State<NewEntryDialog>
         (
           onPressed: () 
           {
-            if (_wordController.text.isEmpty) 
+            if (_wordController.text.isNotEmpty) 
             {
-              widget.shakeController.forward(from: 0.0);
-            } 
-            else 
-            {
-              // Lógica para guardar la entrada
+             // Lógica para guardar la entrada
               try 
               {
                 final entryData = 
@@ -404,7 +445,7 @@ class EditEntryDialogState extends State<EditEntryDialog>
               onPressed: () 
               {
                 // Diálogo para eliminar entrada
-                _showDeleteConfirmationDialog();
+                _showDeleteEntryDialog();
               },
             ),
           ),
@@ -452,7 +493,10 @@ class EditEntryDialogState extends State<EditEntryDialog>
         (
           onPressed: () 
           {
-            _updateEntry().then((_) { widget.fillEntriesItems(); }); // método para edición y después actualizamos lista
+            if(_wordController.text.trim().isNotEmpty)
+            {
+              _updateEntry().then((_) { widget.fillEntriesItems(); }); // método para edición y después actualizamos lista
+            }
             Navigator.of(context).pop();
           },
           child: const Text('Save'),
@@ -469,6 +513,7 @@ class EditEntryDialogState extends State<EditEntryDialog>
     );
   }
 
+  // Método para construir un TextField con validación de campo no vacío
   Widget _buildTextField(TextEditingController controller, String hintText) 
   {
     return TextField
@@ -524,8 +569,8 @@ class EditEntryDialogState extends State<EditEntryDialog>
     );
   }
 
-  // Método para mostrar el diálogo de eliminar entrada
-  void _showDeleteConfirmationDialog() 
+  // Método para mostrar el diálogo de eliminar ENTRADA
+  void _showDeleteEntryDialog() 
   {
     showDialog
     (
@@ -564,7 +609,7 @@ class EditEntryDialogState extends State<EditEntryDialog>
     );
   }
 
-  // Método para borrar la entrada
+  // Método para borrar una entrada
   Future<void> _deleteEntry() async 
   {
     final crudEntries = CRUDEntries();
@@ -581,6 +626,14 @@ class EditEntryDialogState extends State<EditEntryDialog>
   // Método para actualizar la entrada
   Future<void> _updateEntry() async 
   {
+    if (_definitionController.text.trim().isEmpty) // solo se puede jugar con la palabra si hay definición, independientemente del estado del switch
+    {
+      setState(() 
+      {
+        _isPlayable = false;
+      });
+    }
+
     final entryData = 
     {
       'idEntrada': widget.entry['idEntrada'],

@@ -62,5 +62,32 @@ class CRUDdictionaries
       throw Exception('Error al actualizar el nombre del diccionario');
     }
   }
+
+  // Método para eliminar un diccionario y todas sus entradas asociadas
+  Future<void> deleteDictionary(int dictionaryId) async 
+  {
+    // Primero, eliminamos todas las entradas asociadas al diccionario
+    await _deleteEntriesByDictionaryId(dictionaryId);
+
+    // Luego, eliminamos el diccionario
+    final response = await http.delete(Uri.parse('$url/?idDiccionario=$dictionaryId'));
+
+    if (response.statusCode != 200) 
+    {
+      throw Exception('Error al eliminar el diccionario');
+    }
+  }
+
+  // Método privado para eliminar todas las entradas asociadas a un diccionario
+  Future<void> _deleteEntriesByDictionaryId(int dictionaryId) async 
+  {
+    const entryUrl = 'http://192.168.1.84/api_PI/entradas.php';
+    final response = await http.delete(Uri.parse('$entryUrl/?idDiccionarioFK=$dictionaryId'));
+
+    if (response.statusCode != 200) 
+    {
+      throw Exception('Error al eliminar las entradas asociadas al diccionario');
+    }
+  }
 }
 

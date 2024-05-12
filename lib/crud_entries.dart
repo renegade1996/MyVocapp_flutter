@@ -31,7 +31,7 @@ class CRUDEntries
         'descripcionEntrada': entryData['descripcionEntrada'].toString(),
         'ejemploEntrada': entryData['ejemploEntrada'].toString(),
         'trucoEntrada': entryData['trucoEntrada'].toString(),
-        'tipoEntrada': entryData['tipoEntrada'] ? '1' : '0'.toString(),
+        'tipoEntrada': entryData['tipoEntrada'] ? '1' : '0',
         'idDiccionarioFK': entryData['idDiccionarioFK'].toString(),
       },
     );

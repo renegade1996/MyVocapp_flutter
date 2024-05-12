@@ -97,7 +97,8 @@ class LoginPageState extends State<LoginPage>
     (
       appBar: AppBar
       (
-        title: const Text('Log in'),
+        title: const Text('Log in', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
       ),
       body: Center
       (
@@ -117,38 +118,29 @@ class LoginPageState extends State<LoginPage>
               [
                 ElevatedButton
                 (
-                  onPressed: () async 
+                  onPressed: () async
                   {
                     String username = _usernameController.text;
                     String password = _passwordController.text;
                     bool isValid = await verifyCredentials(username, password);
-
-                    if (isValid) 
+                    if (isValid)
                     {
-                      // Guardamos el estado de inicio de sesión como verdadero en Shared Preferences
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       await prefs.setBool('isLoggedIn', true);
-
-                      // Obtenemos el ID del usuario
                       int userId = await CRUDUsers().getUserId(username);
-                      
-                      // Guardamos el ID en SharedPreferences
                       await prefs.setInt('userId', userId);
-
-                      // Navegamos a la clase Dictionaries
                       Navigator.push
                       (
                         context,
                         MaterialPageRoute
                         (
-                          builder: (context) => Dictionaries(userId: userId), // pasamos el id
+                          builder: (context) => Dictionaries(userId: userId),
                         ),
                       );
                       debugPrint('Logged-user ID: $userId');
                     } 
                     else 
                     {
-                      // Mostrar un mensaje de error si las credenciales no son válidas
                       ScaffoldMessenger.of(context).showSnackBar
                       (
                         const SnackBar
@@ -160,7 +152,8 @@ class LoginPageState extends State<LoginPage>
                   },
                   child: const Text('Log In'),
                 ),
-                ElevatedButton(
+                ElevatedButton
+                (
                   onPressed: () 
                   {
                     Navigator.push
@@ -168,7 +161,7 @@ class LoginPageState extends State<LoginPage>
                       context,
                       MaterialPageRoute
                       (
-                        builder: (context) => const SignUp(), // Navegamos a la clase SignUp
+                        builder: (context) => const SignUp(),
                       ),
                     );
                   },
@@ -179,6 +172,7 @@ class LoginPageState extends State<LoginPage>
           ],
         ),
       ),
+      backgroundColor: Colors.blue[200],
     );
   }
   Widget _buildInputField(String labelText, TextEditingController controller) // helper function (para el campo de texto)

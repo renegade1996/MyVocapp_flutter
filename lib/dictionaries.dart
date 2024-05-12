@@ -39,51 +39,54 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
           const Text("Games", style: TextStyle(color: Colors.white)) : const Text("Dictionaries", style: TextStyle(color: Colors.white)),
         automaticallyImplyLeading: false, // sin flecha de retroceder
         backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: 
         [
-        PopupMenuButton(
-          icon: const Icon(Icons.settings),
-          itemBuilder: (BuildContext context) => <PopupMenuEntry>
-          [
-            PopupMenuItem(
-              child: const Row
-              (
-                children: 
-                [
-                  Icon(Icons.settings),
-                  SizedBox(width: 8),
-                  Text('Account'),
-                ],
-              ),
-              onTap: () 
-              {
-                // hacer dialogo para cambiar nombre de cuenta y contraseña
-              },
-            ),
-            PopupMenuItem
+          PopupMenuButton
             (
-              child: const Row
+            icon: const Icon(Icons.settings),
+            itemBuilder: (BuildContext context) => <PopupMenuEntry>
+            [
+              PopupMenuItem
               (
-                children: 
-                [
-                  Icon(Icons.exit_to_app),
-                  SizedBox(width: 8),
-                  Text('Log out'),
-                ],
-              ),
-              onTap: () async 
-              {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('isLoggedIn', false);
-                Navigator.pushReplacement
+                child: const Row
                 (
-                  context,
-                  MaterialPageRoute(builder: (context) => const Login()),
-                );
-              },
-            ),
-          ],
-        ),
+                  children: 
+                  [
+                    Icon(Icons.settings, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Account'),
+                  ],
+                ),
+                onTap: () 
+                {
+                  // hacer dialogo para cambiar nombre de cuenta y contraseña
+                },
+              ),
+              PopupMenuItem
+              (
+                child: const Row
+                (
+                  children: 
+                  [
+                    Icon(Icons.exit_to_app, color: Colors.black),
+                    SizedBox(width: 8),
+                    Text('Log out'),
+                  ],
+                ),
+                onTap: () async 
+                {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('isLoggedIn', false);
+                  Navigator.pushReplacement
+                  (
+                    context,
+                    MaterialPageRoute(builder: (context) => const Login()),
+                  );
+                },
+              ),
+            ],
+          ),
         ],
       ),
       body: _getCurrentTab(), // cuerpo
@@ -98,7 +101,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomAppBar
       (
-        color: Colors.black,
+        color: const Color.fromARGB(255, 38, 130, 84),
         shape: const CircularNotchedRectangle(),
         notchMargin: 4.0,
         child: Row
@@ -136,7 +139,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
         // Devuelve el widget para la pantalla de diccionarios
         return Container
         (
-          color: Colors.purple[100],
+          color: Colors.blue[200],
           child: ListView.builder // constructor de lista
           (
             itemCount: dictionaryItems.length,
@@ -156,6 +159,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                         dictionaryName: dictionaryItems[index].name,
                         userId: widget.userId,
                         dictionaryId: dictionaryItems[index].id,
+                        onDeleteDictionary: fillDictionaryItems, // función callback
                       ),
                     ),
                   );
@@ -166,20 +170,26 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                 },
                 child: Card
                 (
+                  color: const Color.fromARGB(255, 38, 130, 84),
                   child: ListTile
                   (
-                    title: Text(dictionaryItems[index]._name),
-                 )
-                ),
-              );
-            },
-          )
-        );
+                    title: Text(dictionaryItems[index]._name,
+                    style: const TextStyle
+                    (
+                      color: Colors.white, // Texto blanco
+                    ),
+                  )
+                )
+              ),
+            );
+          },
+        )
+      );
       case 1:
         // Devuelve el widget para la pantalla de juegos
         return Container
         (
-          color: Colors.blue,
+          color: Colors.blue[200],
           child: const Center
           (
             child: Text
