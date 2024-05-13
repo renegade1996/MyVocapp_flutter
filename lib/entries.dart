@@ -171,21 +171,25 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
             (
               onPressed: () 
               {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton
-            (
-              onPressed: () 
-              {
                 // borrar diccionario y entradas en la base de datos 
                 _deleteDictionary();
 
                 Navigator.of(context).pop(); // Cierra el segundo diálogo
                 Navigator.of(context).pop(); // Cierra el primer diálogo            
               },
-              child: const Text('Delete'),
+              style: ElevatedButton.styleFrom
+              (
+                backgroundColor: Colors.red, // Color de fondo rojo
+              ),
+              child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            ),
+            ElevatedButton
+            (
+              onPressed: () 
+              {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
             ),
           ],
         );
@@ -587,21 +591,25 @@ class EditEntryDialogState extends State<EditEntryDialog>
             (
               onPressed: () 
               {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton
-            (
-              onPressed: () 
-              {
                 // borrar entrada en la base de datos 
                 _deleteEntry().then((_) { widget.fillEntriesItems(); });
 
                 Navigator.of(context).pop(); // Cierra el segundo diálogo
                 Navigator.of(context).pop(); // Cierra el primer diálogo            
               },
-              child: const Text('Delete'),
+              style: ElevatedButton.styleFrom
+              (
+                backgroundColor: Colors.red, // Color de fondo rojo
+              ),
+              child: const Text('Delete', style: TextStyle(color: Colors.white)),
+            ),
+            ElevatedButton
+            (
+              onPressed: () 
+              {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
             ),
           ],
         );

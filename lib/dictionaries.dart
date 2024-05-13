@@ -3,6 +3,7 @@ import 'crud_dictionaries.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
 import 'entries.dart';
+import 'settings.dart';
 
 class Dictionaries extends StatefulWidget 
 {
@@ -43,7 +44,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
         actions: 
         [
           PopupMenuButton
-            (
+          (
             icon: const Icon(Icons.settings),
             itemBuilder: (BuildContext context) => <PopupMenuEntry>
             [
@@ -60,7 +61,12 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                 ),
                 onTap: () 
                 {
-                  // hacer dialogo para cambiar nombre de cuenta y contraseña
+                  // Cambio de usuario/contraseña o borrado de usuario
+                  Navigator.push
+                  (
+                    context,
+                    MaterialPageRoute(builder: (context) => AccountSettingsScreen(userId: widget.userId)),
+                  );
                 },
               ),
               PopupMenuItem

@@ -74,30 +74,89 @@ class CRUDUsers
   }
 
   // Método para obtener el ID de un usuario al iniciar sesión
-Future<int> getUserId(String username) async 
-{
-  final response = await http.get
-  (
-    Uri.parse('$url/usuarios.php?nombreUsuario=$username'),
-  );
-
-  if (response.statusCode == 200) 
+  Future<int> getUserId(String username) async 
   {
-    final responseData = json.decode(response.body);
+    final response = await http.get
+    (
+      Uri.parse('$url/usuarios.php?nombreUsuario=$username'),
+    );
 
-    // Verificar si el usuario fue encontrado
-    if (responseData.containsKey('data')) 
+    if (response.statusCode == 200) 
     {
-      final userData = responseData['data'];
-      
-      // Verificar si se encontró el usuario y se devolvió su ID
-      if (userData.containsKey('idUsuario')) 
+      final responseData = json.decode(response.body);
+
+      // Verificar si el usuario fue encontrado
+      if (responseData.containsKey('data')) 
       {
-        return int.parse(userData['idUsuario'].toString());
+        final userData = responseData['data'];
+        
+        // Verificar si se encontró el usuario y se devolvió su ID
+        if (userData.containsKey('idUsuario')) 
+        {
+          return int.parse(userData['idUsuario'].toString());
+        }
       }
     }
-  }
     // Si no se encuentra el usuario o no se devuelve un ID, devuelve -1
     return -1;
+  }
+
+  // Método para modificar el nombre de usuario si no existe ya ese nombre de usuario
+  Future<bool> updateUsernameIfNotExists(int userId, String newUsername) async 
+  {
+    String currentUsername = await getCurrentUsername(userId);
+
+    // Verificar si el nuevo nombre de usuario es diferente del actual
+    if (currentUsername != newUsername.trim() && newUsername.isNotEmpty) 
+    {
+      // Intentar actualizar el nombre de usuario
+      final updateResponse = await http.put
+      (
+        Uri.parse('$url/usuarios.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode
+        ({
+          'idUsuario': userId,
+          'nombreUsuario': newUsername
+        }),
+      );
+
+      if (updateResponse.statusCode == 200 || updateResponse.statusCode == 201) {
+        return true; // Actualización exitosa
+      } else {
+        return false; // Error en la actualización
+      }
+    } 
+    else 
+    {
+      // No hay necesidad de actualizar, el nombre de usuario es el mismo o está en blanco
+      return false;
+    }
+  }
+
+  // Método para obtener el nombre de usuario a partir del userId
+  Future<String> getCurrentUsername(int userId) async 
+  {
+    final response = await http.get
+    (
+      Uri.parse('$url/usuarios.php?idUsuario=$userId'),
+    );
+
+    if (response.statusCode == 200) 
+    {
+      final responseData = json.decode(response.body);
+
+      // Verificar si se ha encontrado el nombre de usuario y devolverlo
+      if (responseData.containsKey('data')) 
+      {
+        final userData = responseData['data'];
+        if (userData.containsKey('nombreUsuario')) 
+        {
+          return userData['nombreUsuario'];
+        }
+      }
+    }
+    // Si no se encuentra el nombre de usuario, devolver una cadena vacía
+    return '';
   }
 }
