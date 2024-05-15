@@ -171,6 +171,14 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
             (
               onPressed: () 
               {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton
+            (
+              onPressed: () 
+              {
                 // borrar diccionario y entradas en la base de datos 
                 _deleteDictionary();
 
@@ -182,14 +190,6 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
                 backgroundColor: Colors.red, // Color de fondo rojo
               ),
               child: const Text('Delete', style: TextStyle(color: Colors.white)),
-            ),
-            ElevatedButton
-            (
-              onPressed: () 
-              {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
             ),
           ],
         );
@@ -279,6 +279,14 @@ class NewEntryDialogState extends State<NewEntryDialog>
         (
           onPressed: () 
           {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton
+        (
+          onPressed: () 
+          {
             if (_wordController.text.isNotEmpty) 
             {
              // Lógica para guardar la entrada
@@ -303,14 +311,6 @@ class NewEntryDialogState extends State<NewEntryDialog>
             }
           },
           child: const Text('Save'),
-        ),
-        ElevatedButton
-        (
-          onPressed: () 
-          {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
         ),
       ],
     );
@@ -497,6 +497,14 @@ class EditEntryDialogState extends State<EditEntryDialog>
         (
           onPressed: () 
           {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton
+        (
+          onPressed: () 
+          {
             if(_wordController.text.trim().isNotEmpty)
             {
               _updateEntry().then((_) { widget.fillEntriesItems(); }); // método para edición y después actualizamos lista
@@ -504,14 +512,6 @@ class EditEntryDialogState extends State<EditEntryDialog>
             Navigator.of(context).pop();
           },
           child: const Text('Save'),
-        ),
-        ElevatedButton
-        (
-          onPressed: () 
-          {
-            Navigator.of(context).pop();
-          },
-          child: const Text('Cancel'),
         ),
       ],
     );
@@ -591,6 +591,14 @@ class EditEntryDialogState extends State<EditEntryDialog>
             (
               onPressed: () 
               {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton
+            (
+              onPressed: () 
+              {
                 // borrar entrada en la base de datos 
                 _deleteEntry().then((_) { widget.fillEntriesItems(); });
 
@@ -602,14 +610,6 @@ class EditEntryDialogState extends State<EditEntryDialog>
                 backgroundColor: Colors.red, // Color de fondo rojo
               ),
               child: const Text('Delete', style: TextStyle(color: Colors.white)),
-            ),
-            ElevatedButton
-            (
-              onPressed: () 
-              {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
             ),
           ],
         );

@@ -17,7 +17,7 @@ class Dictionaries extends StatefulWidget
 
 class DictionariesState extends State<Dictionaries>  // Almacena el estado actual de la pantalla y la pestaña activa
 {
-  int _currentIndex = 0; // index 0 -> diccionarios, index 1 -> juegos
+  int _currentIndex = 0; // index 0 -> diccionarios, index 1 -> flashcards
 
   // Lista de diccionarios (clase pojo al final)
   List<Dictionary> dictionaryItems = [];
@@ -37,7 +37,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
       appBar: AppBar // encabezado
       (
         title: _currentIndex == 1 ? 
-          const Text("Games", style: TextStyle(color: Colors.white)) : const Text("Dictionaries", style: TextStyle(color: Colors.white)),
+          const Text("Flashcards", style: TextStyle(color: Colors.white)) : const Text("Dictionaries", style: TextStyle(color: Colors.white)),
         automaticallyImplyLeading: false, // sin flecha de retroceder
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -103,7 +103,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
             _showAddDictionaryDialog(); // añadir nuevo diccionario
           },
           child: const Icon(Icons.add) // icono + (está built-in, también es un widget hijo del botón flotante)
-        ) : null, // sin botón en pantalla juegos
+        ) : null, // sin botón en pantalla flashcards
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomAppBar
       (
@@ -125,7 +125,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
             ),
             IconButton
             (
-              icon: Image.asset('assets/ic_games.png'),  // añadir icono juegos
+              icon: Image.asset('assets/ic_flashcards.png'),  // añadir icono flashcards
               onPressed: () 
               {
                 _changeTab(1);
@@ -191,22 +191,80 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
           },
         )
       );
-      case 1:
-        // Devuelve el widget para la pantalla de juegos
+      case 1:  // Devuelve el widget para la pantalla de flashcards
         return Container
         (
           color: Colors.blue[200],
-          child: const Center
+          padding: const EdgeInsets.all(16.0),
+          child: Column
           (
-            child: Text
-            (
-              "Contenido pantalla juegos",
-              style: TextStyle(fontSize: 24.0, color: Colors.white),
-            ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: 
+            [
+              const Padding
+              (
+                padding: EdgeInsets.only(bottom: 16.0),
+                child: Text
+                (
+                  " Pick a deck to start practicing :)",
+                  style: TextStyle
+                  (
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Expanded
+              (
+                child: GridView.count
+                (
+                  crossAxisCount: 2, // Dos tarjetas por fila
+                  mainAxisSpacing: 16.0,
+                  crossAxisSpacing: 16.0,
+                  children: List.generate(dictionaryItems.length, (index) 
+                  {
+                    return GestureDetector
+                    (
+                      onTap: () 
+                      {
+                        // Ir a las flashcards del diccionario elegido
+                      },
+                      child: Card
+                      (
+                        color: const Color.fromARGB(255, 38, 130, 84),
+                        child: Stack
+                        (
+                          children:
+                          [
+                            Image.asset
+                            (
+                              'assets/ic_flashcards2.png', // Ruta de la imagen
+                              fit: BoxFit.cover, // Ajustar imagen a la tarjeta
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                            Container
+                            (
+                              alignment: Alignment.center,
+                              child: Text
+                              (
+                                "${dictionaryItems[index].name} Deck",
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
           ),
         );
       default:
-        return Container();
+      return Container();
     }
   }
 
@@ -244,6 +302,14 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               (
                 onPressed: () 
                 {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton
+              (
+                onPressed: () 
+                {
                   String newDictionaryName = controller.text.trim();
                   
                   if(newDictionaryName != "") // si tiene algo escrito -> Editar diccionario
@@ -255,14 +321,6 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                   Navigator.of(context).pop();
                 },
                 child: const Text("OK"),
-              ),
-              ElevatedButton
-              (
-                onPressed: () 
-                {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Cancel"),
               ),
             ],
           );
@@ -302,6 +360,14 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               (
                 onPressed: () 
                 {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton
+              (
+                onPressed: () 
+                {
                   if(newDictionaryName != "")
                   {
                     // Añadir el nuevo diccionario
@@ -311,14 +377,6 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                   Navigator.of(context).pop();
                 },
                 child: const Text("OK"),
-              ),
-              ElevatedButton
-              (
-                onPressed: () 
-                {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Cancel"),
               ),
             ],
           );

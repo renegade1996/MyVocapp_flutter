@@ -17,10 +17,18 @@ class SignUp extends StatelessWidget
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: const Padding
+      body: SingleChildScrollView
       (
-        padding: EdgeInsets.all(20.0),
-        child: SignUpForm(),
+        child: SizedBox
+        (
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: Container
+          (
+            padding: const EdgeInsets.all(20.0),
+            child: const SignUpForm(),
+          ),
+        ),
       ),
       backgroundColor: Colors.blue[200],
     );

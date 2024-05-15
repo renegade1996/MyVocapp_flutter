@@ -121,15 +121,55 @@ class CRUDUsers
         }),
       );
 
-      if (updateResponse.statusCode == 200 || updateResponse.statusCode == 201) {
+      if (updateResponse.statusCode == 200 || updateResponse.statusCode == 201) 
+      {
         return true; // Actualización exitosa
-      } else {
+      } 
+      else 
+      {
+        //print(updateResponse.statusCode);
         return false; // Error en la actualización
       }
     } 
     else 
     {
       // No hay necesidad de actualizar, el nombre de usuario es el mismo o está en blanco
+      return false;
+    }
+  }
+
+  // Actualizar la contraseña de usuario
+  Future<bool> updatePassword(int userId, String currentPassword, String newPassword) async 
+  {
+    try 
+    {
+      // Enviar la solicitud PUT al servidor para actualizar la contraseña
+      final response = await http.put
+      (
+        Uri.parse('$url/usuarios.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode
+        ({
+          'idUsuario': userId,
+          'claveUsuario': currentPassword,
+          'nuevaClaveUsuario': newPassword,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) 
+      {
+        return true; 
+      } 
+      else 
+      {
+        print(response.body);
+        return false; // Error en la actualización
+      }
+    } 
+    catch (e) 
+    {
+      // Manejar cualquier error de conexión
+      print('Error updating password: $e');
       return false;
     }
   }
@@ -158,5 +198,25 @@ class CRUDUsers
     }
     // Si no se encuentra el nombre de usuario, devolver una cadena vacía
     return '';
+  }
+
+  // Método para eliminar un usuario por su ID
+  Future<bool> deleteUserById(int userId) async 
+  {
+    final deleteResponse = await http.delete
+    (
+      Uri.parse('$url/usuarios.php?idUsuario=$userId'),
+    );
+
+    if (deleteResponse.statusCode == 200) 
+    {
+      //print('User with ID $userId deleted successfully.');
+      return true;
+    } 
+    else 
+    {
+      //print('Failed to delete user with ID $userId. Status code: ${deleteResponse.statusCode}');
+      return false; // Error en la eliminación
+    }
   }
 }
