@@ -22,6 +22,17 @@ class CRUDEntries
   // Método para agregar una nueva entrada
   Future<Map<String, dynamic>> addEntry(Map<String, dynamic> entryData) async 
   {
+    // Verificar si los campos "tituloEntrada" y "descripcionEntrada" están llenos
+    if (entryData['tituloEntrada'] != "" && entryData['descripcionEntrada'] != "") 
+    {
+      // Si están llenos, establecer tipoEntrada en true automáticamente
+      entryData['tipoEntrada'] = true;
+    }
+    else
+    {
+      entryData['tipoEntrada'] = false;
+    }
+
     final response = await http.post
     (
       Uri.parse(url),

@@ -105,7 +105,6 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
               (
                 onAddEntry: (newEntry) => _addEntry(newEntry, isPlayable), // Pasar la función addEntry
                 dictionaryId: widget.dictionaryId, // pasar el id del diccionario
-                isPlayable: isPlayable, // Pasar el valor de isPlayable al constructor del NewEntryDialog
                 fillEntriesItems: fillEntriesItems,
               );
             },
@@ -228,6 +227,17 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
   {
     try 
     {
+      // Verificar si los campos "word or expression" y "definition or translation" están llenos
+      if (newEntry['tituloEntrada'] != null && newEntry['descripcionEntrada'] != null) 
+      {
+        // Si están llenos, establecer isPlayable en true automáticamente al crear una nueva entrada
+        newEntry['tipoEntrada'] = true;
+      }
+      else
+      {
+        newEntry['tipoEntrada'] = false;
+      }
+      
       final crudEntries = CRUDEntries();
       await crudEntries.addEntry(newEntry);
       fillEntriesItems();
@@ -244,10 +254,9 @@ class NewEntryDialog extends StatefulWidget
 {
   final Function(Map<String, dynamic>) onAddEntry;
   final int dictionaryId;
-  final bool isPlayable;
   final Function fillEntriesItems;
 
-  const NewEntryDialog({super.key, required this.onAddEntry, required this.dictionaryId, required this.isPlayable, required this.fillEntriesItems});
+  const NewEntryDialog({super.key, required this.onAddEntry, required this.dictionaryId, required this.fillEntriesItems});
 
   @override
   NewEntryDialogState createState() => NewEntryDialogState();
@@ -258,6 +267,8 @@ class NewEntryDialogState extends State<NewEntryDialog>
   final TextEditingController _definitionController = TextEditingController();
   final TextEditingController _exampleController = TextEditingController();
   final TextEditingController _tipController = TextEditingController();
+  bool isPlayable = false;
+
   
   @override
   Widget build(BuildContext context) 
@@ -300,6 +311,13 @@ class NewEntryDialogState extends State<NewEntryDialog>
             if (_wordController.text.isNotEmpty) 
             {
              // Lógica para guardar la entrada
+             
+             // Verificar si los campos "tituloEntrada" y "descripcionEntrada" están llenos
+              if (_wordController.text.trim().isNotEmpty && _definitionController.text.trim().isNotEmpty) 
+              {
+                // Si están llenos, establecer tipoEntrada en true automáticamente
+                isPlayable = true;
+              } 
               try 
               {
                 final entryData = 
@@ -308,7 +326,7 @@ class NewEntryDialogState extends State<NewEntryDialog>
                   'descripcionEntrada': _definitionController.text,
                   'ejemploEntrada': _exampleController.text,
                   'trucoEntrada': _tipController.text,
-                  'tipoEntrada': widget.isPlayable,
+                  'tipoEntrada': isPlayable,
                   'idDiccionarioFK': widget.dictionaryId,
                 };
                 widget.onAddEntry(entryData); // Llamar a la función onAddEntry
@@ -423,8 +441,8 @@ class EditEntryDialogState extends State<EditEntryDialog>
     _definitionController.text = widget.entry['descripcionEntrada'] ?? '';
     _exampleController.text = widget.entry['ejemploEntrada'] ?? '';
     _tipController.text = widget.entry['trucoEntrada'] ?? '';
-    // Configurar el switch para que esté activado si tipoEntrada es true
-    if (widget.entry['tipoEntrada'] != null) 
+    // Configurar el switch para que esté activado si tipoEntrada es true y existe una descripción
+    if (widget.entry['tipoEntrada'] != null && widget.entry['descripcionEntrada'] != null) 
     {
       _isPlayable = widget.entry['tipoEntrada'] == 1;
     } 
