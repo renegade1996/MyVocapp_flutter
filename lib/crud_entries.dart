@@ -50,7 +50,7 @@ class CRUDEntries
   {
     final response = await http.put
     (
-      Uri.parse("$url?idEntrada=$entryData['idEntrada']"),
+      Uri.parse("$url?idEntrada=${entryData['idEntrada']}"),
       body: 
       {
         'idEntrada': entryData['idEntrada'].toString(),

@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/crud_dictionaries.dart';
 import 'package:my_flutter_app/crud_entries.dart';
@@ -200,14 +201,26 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
   // Método para mostrar el diálogo de edición
   void _showEditDialog(Map<String, dynamic> entry) 
   {
-    showDialog
-    (
-      context: context,
-      builder: (BuildContext context) 
-      {
-        return EditEntryDialog(entry: entry, fillEntriesItems: fillEntriesItems);
-      },
-    );
+    if(entry['idEntrada'] != null) 
+    {
+      showDialog
+      (
+        context: context,
+        builder: (BuildContext context) 
+        {
+          return EditEntryDialog
+          (
+            entry: entry,
+            entryId: entry['idEntrada'], // Pasar el ID solo si no es nulo
+            fillEntriesItems: fillEntriesItems,
+          );
+        },
+      );
+    } 
+    else 
+    {
+      debugPrint('Entry ID is null');
+    }
   }
 
   // Método para agregar una nueva entrada a la lista
@@ -217,10 +230,7 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
     {
       final crudEntries = CRUDEntries();
       await crudEntries.addEntry(newEntry);
-      setState(() 
-      {
-        entries.add(newEntry);
-      });
+      fillEntriesItems();
     } 
     catch (e) 
     {
@@ -388,9 +398,10 @@ class NewEntryDialogState extends State<NewEntryDialog>
 class EditEntryDialog extends StatefulWidget 
 {
   final Map<String, dynamic> entry;
+  final int entryId;
   final Function fillEntriesItems;
 
-  const EditEntryDialog({super.key, required this.entry, required this.fillEntriesItems});
+  const EditEntryDialog({super.key, required this.entry, required this.fillEntriesItems, required this.entryId});
   @override
   EditEntryDialogState createState() => EditEntryDialogState();
 }
