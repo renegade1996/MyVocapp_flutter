@@ -311,13 +311,6 @@ class NewEntryDialogState extends State<NewEntryDialog>
             if (_wordController.text.isNotEmpty) 
             {
              // Lógica para guardar la entrada
-             
-             // Verificar si los campos "tituloEntrada" y "descripcionEntrada" están llenos
-              if (_wordController.text.trim().isNotEmpty && _definitionController.text.trim().isNotEmpty) 
-              {
-                // Si están llenos, establecer tipoEntrada en true automáticamente
-                isPlayable = true;
-              } 
               try 
               {
                 final entryData = 
@@ -336,6 +329,10 @@ class NewEntryDialogState extends State<NewEntryDialog>
               {
                 debugPrint('Error al agregar la entrada: $e');
               }
+            }
+            else
+            {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("The 'Word or expression' field cannot be empty")));
             }
           },
           child: const Text('Save'),
@@ -537,7 +534,7 @@ class EditEntryDialogState extends State<EditEntryDialog>
             if(_wordController.text.trim().isNotEmpty)
             {
               _updateEntry().then((_) { widget.fillEntriesItems(); }); // método para edición y después actualizamos lista
-            }
+            }            
             Navigator.of(context).pop();
           },
           child: const Text('Save'),
