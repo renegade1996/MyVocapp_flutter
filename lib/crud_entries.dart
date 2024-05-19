@@ -8,7 +8,10 @@ class CRUDEntries
   // Método para obtener todas las entradas de un diccionario concreto
   Future<List<dynamic>> getEntries(int dictionaryId) async 
   {
-    final response = await http.get(Uri.parse('$url?idDiccionarioFK=$dictionaryId'));
+    final response = await http.get
+    (
+        Uri.parse('$url?idDiccionarioFK=$dictionaryId'),
+    );
 
     if (response.statusCode == 200) 
     {

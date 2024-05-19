@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
+import 'package:my_flutter_app/crud_entries.dart';
 
 class FlashcardScreen extends StatelessWidget 
 {
@@ -11,14 +12,6 @@ class FlashcardScreen extends StatelessWidget
   @override
   Widget build(BuildContext context) 
   {
-    // Simulación de datos. Reemplazar esto con una llamada a la base de datos
-    List<Map<String, String>> flashcards = 
-    [
-      {'word': 'Hello', 'definition': 'A greeting'},
-      {'word': 'Flutter', 'definition': 'A UI toolkit for building natively compiled applications'},
-      {'word': 'Dart', 'definition': 'A programming language optimized for building user interfaces'},
-    ];
-
     return Scaffold
     (
       appBar: AppBar
@@ -27,15 +20,57 @@ class FlashcardScreen extends StatelessWidget
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white), // flechita blanca
       ),
-      body: Flashcards(flashcards: flashcards),
+      body:FutureBuilder<List<Map<String, dynamic>>>
+      (
+        future: _fetchFlashcards(), // Llama a una función para obtener las flashcards desde la base de datos
+        builder: (context, snapshot) 
+        {
+          if (snapshot.connectionState == ConnectionState.waiting) 
+          {
+            return const Center(child: CircularProgressIndicator());
+          } 
+          else if (snapshot.hasError) 
+          {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } 
+          else 
+          {
+            final flashcards = snapshot.data ?? [];
+            return Flashcards(flashcards: flashcards);
+          }
+        },
+      ),
       backgroundColor: Colors.blue[200],
     );
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchFlashcards() async 
+  {
+    try 
+    {
+      final crudEntries = CRUDEntries();
+      final fetchedEntries = await crudEntries.getEntries(dictionaryId);
+      
+      debugPrint('Received entries: $fetchedEntries');
+
+      // Filtrar las entradas que cumplan con el criterio 'tipoEntrada'
+      final filteredEntries = fetchedEntries.where((entry) => entry['tipoEntrada'] == 1);
+
+      debugPrint('Filtered entries: $filteredEntries');
+
+      return List<Map<String, dynamic>>.from(filteredEntries);
+    } 
+    catch (e)
+    {
+      debugPrint('Failed to obtain entries: $e');
+      return [];
+    }
   }
 }
 
 class Flashcards extends StatefulWidget 
 {
-  final List<Map<String, String>> flashcards;
+  final List<Map<String, dynamic>> flashcards;
 
   const Flashcards({super.key, required this.flashcards});
 
@@ -66,7 +101,7 @@ class FlashcardsState extends State<Flashcards>
   @override
   Widget build(BuildContext context) 
   {
-    final currentFlashcard = widget.flashcards[_currentIndex];
+    final currentEntry = widget.flashcards.isNotEmpty ? widget.flashcards[_currentIndex] : null;
 
     return Stack
     ( 
@@ -80,8 +115,8 @@ class FlashcardsState extends State<Flashcards>
             FlipCard
             (
               direction: FlipDirection.HORIZONTAL,
-              front: _buildCard(currentFlashcard['definition'] ?? ''),
-              back: _buildCard(currentFlashcard['word'] ?? ''),
+              front: _buildCard(currentEntry?['descripcionEntrada'] ?? ''),
+              back: _buildCard(currentEntry?['tituloEntrada'] ?? ''),
             ),
             const SizedBox(height: 20),
             Row
@@ -115,7 +150,7 @@ class FlashcardsState extends State<Flashcards>
               (
                 onPressed: () 
                 {
-                  _showHintDialog();
+                  _showHintDialog(currentEntry?['trucoEntrada'] ?? '');
                 },
                 icon: const Icon(Icons.lightbulb_circle, color: Colors.black, size: 30),
               ),
@@ -123,7 +158,7 @@ class FlashcardsState extends State<Flashcards>
               (
                 onPressed: () 
                 {
-                  _showExampleSentenceDialog();
+                  _showExampleSentenceDialog(currentEntry?['ejemploEntrada'] ?? '');
                 },
                 icon: const Icon(Icons.format_quote, color: Colors.black, size: 30),
               ),
@@ -156,7 +191,7 @@ class FlashcardsState extends State<Flashcards>
     );
   }
 
-  void _showHintDialog() 
+  void _showHintDialog(String tipText) 
   {
     showDialog
     (
@@ -166,7 +201,9 @@ class FlashcardsState extends State<Flashcards>
         return AlertDialog
         (
           title: const Text("Your tip to remember"),
-          content: const Text("Hint"), // colocar la pista correspondiente
+            content: tipText.isNotEmpty
+              ? Text(tipText)
+              : const Text("You did not add a tip to this entry."),
           actions: 
           [
             TextButton
@@ -183,7 +220,7 @@ class FlashcardsState extends State<Flashcards>
     );
   }
 
-  void _showExampleSentenceDialog() 
+  void _showExampleSentenceDialog(String exampleText) 
   {
     showDialog
     (
@@ -192,7 +229,9 @@ class FlashcardsState extends State<Flashcards>
       {
         return AlertDialog(
           title: const Text("Your example sentence"),
-          content: const Text("Example Sentence"), // colocar la "example sentence" correspondiente
+          content: exampleText.isNotEmpty
+            ? Text(exampleText)
+            : const Text("You did not add an example sentence to this entry."),
           actions: 
           [
             TextButton
