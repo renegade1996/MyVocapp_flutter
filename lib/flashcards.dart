@@ -222,6 +222,21 @@ class FlashcardsState extends State<Flashcards>
 
   void _showExampleSentenceDialog(String exampleText) 
   {
+    // Verifica si el exampleText contiene la palabra que se muestra en la parte trasera de la flashcard
+    final currentEntry = widget.flashcards.isNotEmpty ? widget.flashcards[_currentIndex] : null;
+    final backText = currentEntry?['tituloEntrada'] ?? ''; // Texto en la parte trasera de la flashcard
+
+    // Separa el backText en palabras
+    final backTextWords = backText.toLowerCase().split(' ');
+
+    // Reemplaza las palabras en exampleText que coinciden con las palabras en backText por "???"
+    for (final word in backTextWords) 
+    {
+      if (exampleText.toLowerCase().contains(word)) 
+      {
+        exampleText = exampleText.replaceAll(word, "???");
+      }
+    }
     showDialog
     (
       context: context,
