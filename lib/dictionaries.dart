@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
 import 'entries.dart';
 import 'settings.dart';
+import 'flashcards.dart';
 
 class Dictionaries extends StatefulWidget 
 {
@@ -125,7 +126,7 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
             ),
             IconButton
             (
-              icon: Image.asset('assets/ic_flashcards.png'),  // añadir icono flashcards
+              icon: Image.asset('assets/ic_flashcardsW.png'),  // añadir icono flashcards
               onPressed: () 
               {
                 _changeTab(1);
@@ -204,14 +205,18 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
               const Padding
               (
                 padding: EdgeInsets.only(bottom: 16.0),
-                child: Text
+                child: Align
                 (
-                  " Pick a deck to start practicing :)",
-                  style: TextStyle
+                  alignment: Alignment.center,
+                  child: Text
                   (
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    "Pick a deck to start practicing!",
+                    style: TextStyle
+                    (
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -229,17 +234,26 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                       onTap: () 
                       {
                         // Ir a las flashcards del diccionario elegido
+                        Navigator.push
+                        (
+                          context,
+                          MaterialPageRoute
+                          (
+                            builder: (context) => FlashcardScreen(dictionaryId: dictionaryItems[index].id, dictionaryName: dictionaryItems[index].name,),
+                          ),
+                        );
                       },
                       child: Card
                       (
-                        color: const Color.fromARGB(255, 38, 130, 84),
+                        color: Colors.transparent, // Color transparente para el Card
+                        elevation: 0, // Eliminar la sombra
                         child: Stack
                         (
                           children:
                           [
                             Image.asset
                             (
-                              'assets/ic_flashcards2.png', // Ruta de la imagen
+                              'assets/ic_flashcards.png', // Ruta de la imagen
                               fit: BoxFit.cover, // Ajustar imagen a la tarjeta
                               width: double.infinity,
                               height: double.infinity,
@@ -249,8 +263,13 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
                               alignment: Alignment.center,
                               child: Text
                               (
-                                "${dictionaryItems[index].name} Deck",
-                                style: const TextStyle(color: Colors.white),
+                                dictionaryItems[index].name,
+                                style: const TextStyle
+                                (
+                                  color: Colors.white, 
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold
+                                ),
                               ),
                             ),
                           ],

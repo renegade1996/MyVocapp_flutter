@@ -15,7 +15,7 @@ class SignUp extends StatelessWidget
       (
         title: const Text('Sign Up', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white), // flechita blanca
       ),
       body: SingleChildScrollView
       (

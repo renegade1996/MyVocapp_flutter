@@ -30,7 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.0.8 # dependencia para poder usar shared preferences
+  shared_preferences: ^2.0.8 # dependencias para poder usar shared preferences
+  flip_card: ^0.6.0 # dependencias para las flashcards
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -67,7 +68,7 @@ flutter:
     - assets/ic_dictionaries.png
     - assets/ic_games.png
     - assets/ic_flashcards.png
-    - assets/ic_flashcards2.png
+    - assets/ic_flashcardsW.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
