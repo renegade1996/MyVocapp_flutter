@@ -68,39 +68,69 @@ class FlashcardsState extends State<Flashcards>
   {
     final currentFlashcard = widget.flashcards[_currentIndex];
 
-    return Center
-    (
-      child: Column
-      (
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: 
-        [
-          FlipCard
+    return Stack
+    ( 
+      children: 
+      [
+        Column
+        (
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: 
+          [
+            FlipCard
+            (
+              direction: FlipDirection.HORIZONTAL,
+              front: _buildCard(currentFlashcard['definition'] ?? ''),
+              back: _buildCard(currentFlashcard['word'] ?? ''),
+            ),
+            const SizedBox(height: 20),
+            Row
+            (
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: 
+              [
+                ElevatedButton
+                (
+                  onPressed: _previousCard,
+                  child: const Text('Previous'),
+                ),
+                ElevatedButton
+                (
+                  onPressed: _nextCard,
+                  child: const Text('Next'),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Positioned // Posiciona los iconos en la esquina superior derecha
+        ( 
+          top: 0,
+          right: 0,
+          child: Column
           (
-            direction: FlipDirection.HORIZONTAL,
-            front: _buildCard(currentFlashcard['definition'] ?? ''),
-            back: _buildCard(currentFlashcard['word'] ?? ''),
-          ),
-          const SizedBox(height: 20),
-          Row
-          (
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children:
+            children: 
             [
-              ElevatedButton
+              IconButton
               (
-                onPressed: _previousCard,
-                child: const Text('Previous'),
+                onPressed: () 
+                {
+                  _showHintDialog();
+                },
+                icon: const Icon(Icons.lightbulb_circle, color: Colors.black, size: 30),
               ),
-              ElevatedButton
+              IconButton
               (
-                onPressed: _nextCard,
-                child: const Text('Next'),
+                onPressed: () 
+                {
+                  _showExampleSentenceDialog();
+                },
+                icon: const Icon(Icons.format_quote, color: Colors.black, size: 30),
               ),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -123,6 +153,59 @@ class FlashcardsState extends State<Flashcards>
           textAlign: TextAlign.center,
         ),
       ),
+    );
+  }
+
+  void _showHintDialog() 
+  {
+    showDialog
+    (
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog
+        (
+          title: const Text("Your tip to remember"),
+          content: const Text("Hint"), // colocar la pista correspondiente
+          actions: 
+          [
+            TextButton
+            (
+              onPressed: () 
+              {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showExampleSentenceDialog() 
+  {
+    showDialog
+    (
+      context: context,
+      builder: (BuildContext context) 
+      {
+        return AlertDialog(
+          title: const Text("Your example sentence"),
+          content: const Text("Example Sentence"), // colocar la "example sentence" correspondiente
+          actions: 
+          [
+            TextButton
+            (
+              onPressed: () 
+              {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        );
+      },
     );
   }
 }
