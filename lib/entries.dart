@@ -59,7 +59,17 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
       ),
       body: Center
       (
-        child: ListView.builder
+        child: entries.isEmpty? Padding // si no hay entradas
+        (
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text
+          (
+            "Add entries to your ${widget.dictionaryName} dictionary to start learning!",
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+        )
+        : ListView.builder
         (
           itemCount: entries.length,
           itemBuilder: (context, index) 
@@ -275,7 +285,7 @@ class NewEntryDialogState extends State<NewEntryDialog>
   {
     return AlertDialog
     (
-      title: const Text('New word or expression'),
+      title: const Text('New Entry'),
       content: SingleChildScrollView
       (
         child: Column

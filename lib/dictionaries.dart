@@ -147,7 +147,25 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
         return Container
         (
           color: Colors.blue[200],
-          child: ListView.builder // constructor de lista
+          child: dictionaryItems.isEmpty ? const Center // si no hay diccionarios
+          (
+            child: Padding
+            (
+              padding: EdgeInsets.all(16.0),
+              child: Text
+              (
+                "Add a new dictionary to start learning!",
+                style: TextStyle
+                (
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ):
+           ListView.builder // sí hay diccionarios -> constructor de lista
           (
             itemCount: dictionaryItems.length,
             itemBuilder: (context, index) 
@@ -197,7 +215,25 @@ class DictionariesState extends State<Dictionaries>  // Almacena el estado actua
         (
           color: Colors.blue[200],
           padding: const EdgeInsets.all(16.0),
-          child: Column
+          child: dictionaryItems.isEmpty? const Center // si no hay diccionarios
+          (
+            child: Padding
+            (
+              padding: EdgeInsets.all(16.0),
+              child: Text
+              (
+                "You will have decks to play with once you've created your dictionaries.",
+                style: TextStyle
+                (
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          )
+          :Column // si sí hay diccionarios
           (
             crossAxisAlignment: CrossAxisAlignment.start,
             children: 

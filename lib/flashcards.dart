@@ -36,7 +36,22 @@ class FlashcardScreen extends StatelessWidget
           else 
           {
             final flashcards = snapshot.data ?? [];
-            return Flashcards(flashcards: flashcards);
+            if (flashcards.isEmpty) 
+            {
+              return Center
+              (
+                child: Text
+                (
+                  "You will find cards here once you've added entries to your $dictionaryName dictionary.",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+              );
+            } 
+            else 
+            {
+              return Flashcards(flashcards: flashcards);
+            }
           }
         },
       ),
@@ -226,7 +241,7 @@ class FlashcardsState extends State<Flashcards>
     final currentEntry = widget.flashcards.isNotEmpty ? widget.flashcards[_currentIndex] : null;
     final backText = currentEntry?['tituloEntrada'] ?? ''; // Texto en la parte trasera de la flashcard
 
-    // Separa el backText en palabras
+    // Separa el texto de la parte trasera en palabras
     final backTextWords = backText.toLowerCase().split(' ');
 
     // Reemplaza las palabras en exampleText que coinciden con las palabras en backText por "???"
