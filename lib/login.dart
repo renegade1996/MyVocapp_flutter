@@ -120,7 +120,7 @@ class LoginPageState extends State<LoginPage>
                 (
                   onPressed: () async
                   {
-                    String username = _usernameController.text;
+                    String username = _usernameController.text.toLowerCase();
                     String password = _passwordController.text;
                     bool isValid = await verifyCredentials(username, password);
                     if (isValid)

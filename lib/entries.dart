@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/crud_dictionaries.dart';
 import 'package:my_flutter_app/crud_entries.dart';
+import 'package:diacritic/diacritic.dart';
 
 class Entries extends StatefulWidget 
 {
@@ -20,6 +21,7 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
 {
   List<Map<String, dynamic>> entries = [];
   bool isPlayable = false;
+  bool sortAlphabetically = false;
 
   @override
   void initState() 
@@ -69,37 +71,67 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
             style: const TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.bold),
           ),
         )
-        : ListView.builder
+        : Column
         (
-          itemCount: entries.length,
-          itemBuilder: (context, index) 
-          {
-            return GestureDetector
+          children: 
+          [
+            SwitchListTile
             (
-              onTap: () => _showEditDialog(entries[index]),
-              child: Card
+              title: const Text("Sort alphabetically", style: TextStyle(fontWeight: FontWeight.bold)),
+              value: sortAlphabetically,
+              onChanged: (bool value) 
+              {
+                setState(() 
+                {
+                  sortAlphabetically = value;
+
+                  if (sortAlphabetically) 
+                  {
+                    entries.sort((a, b) => compareIgnoreAccents(a['tituloEntrada'], b['tituloEntrada'])); // método para ordenar ignorando acentos
+                  } 
+                  else 
+                  {
+                    fillEntriesItems();
+                  }
+                });
+              },
+            ),
+            Expanded
+            (
+              child:ListView.builder
               (
-                color:const Color.fromARGB(255, 38, 130, 84),
-                child: ListTile
-                (
-                  title: Row
+                itemCount: entries.length,
+                itemBuilder: (context, index) 
+                {
+                  return GestureDetector
                   (
-                    children: 
-                    [
-                      const Icon(Icons.edit, color: Colors.white), // Icono de edición
-                      const SizedBox(width: 8), // Espacio entre el icono y el texto
-                      Text(entries[index]['tituloEntrada'],
-                        style: const TextStyle
+                    onTap: () => _showEditDialog(entries[index]),
+                    child: Card
+                    (
+                      color:const Color.fromARGB(255, 38, 130, 84),
+                      child: ListTile
+                      (
+                        title: Row
                         (
-                          color: Colors.white,
+                          children: 
+                          [
+                            const Icon(Icons.edit, color: Colors.white), // Icono de edición
+                            const SizedBox(width: 8), // Espacio entre el icono y el texto
+                            Text(entries[index]['tituloEntrada'],
+                              style: const TextStyle
+                              (
+                                color: Colors.white,
+                              ),
+                            ), // Título de la entrada
+                          ],
                         ),
-                      ), // Título de la entrada
-                    ],
-                  ),
-                ),
+                      ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton
@@ -142,6 +174,10 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
     catch (e) 
     {
       debugPrint('Failed to obtain entries $e');
+    }
+    if (sortAlphabetically) 
+    {
+      entries.sort((a, b) => compareIgnoreAccents(a['tituloEntrada'], b['tituloEntrada'])); // método para ordenar ignorando acentos
     }
   }
 
@@ -256,6 +292,14 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
     {
       debugPrint('Error adding entry: $e');
     }
+  }
+  
+  // Método para ordenar las entradas alfabéticamente (sin necesidad de consulta con order by en la bd) e ignorando acentos
+  int compareIgnoreAccents(String a, String b) 
+  {
+    String normalizedA = removeDiacritics(a.toLowerCase()); // con librería diacritics
+    String normalizedB = removeDiacritics(b.toLowerCase());
+    return normalizedA.compareTo(normalizedB);
   }
 }
 

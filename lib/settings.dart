@@ -155,7 +155,7 @@ class AccountSettingsScreenState extends State<AccountSettingsScreen>
                 (
                   onPressed: () async 
                   {
-                    String newUsername = newUsernameController.text;
+                    String newUsername = newUsernameController.text.trim().toLowerCase();
                     bool success = await CRUDUsers().updateUsernameIfNotExists(widget.userId, newUsername);
                     if (success) 
                     {
@@ -226,7 +226,7 @@ class AccountSettingsScreenState extends State<AccountSettingsScreen>
                     String confirmNewPassword = confirmNewPasswordController.text;
 
                     // Verificar si la nueva contraseña no está vacía
-                    if (newPassword.trim().isNotEmpty && newPassword.isNotEmpty && confirmNewPassword.isNotEmpty) 
+                    if (newPassword.trim().isNotEmpty && confirmNewPassword.isNotEmpty) 
                     {
                       if (newPassword == confirmNewPassword) 
                       {

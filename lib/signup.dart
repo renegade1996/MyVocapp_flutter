@@ -118,12 +118,12 @@ class SignUpFormState extends State<SignUpForm>
         (
           onPressed: () async 
           {
-            String username = _usernameController.text;
+            String username = _usernameController.text.toLowerCase();
             String password = _passwordController.text;
             String confirmPassword = _confirmPasswordController.text;
 
             // Verificar si los campos están vacíos
-            if (username.isEmpty || password.isEmpty || confirmPassword.isEmpty)
+            if (username.trim().isEmpty || password.trim().isEmpty || confirmPassword.trim().isEmpty)
              {
               ScaffoldMessenger.of(context).showSnackBar
               (
@@ -168,7 +168,9 @@ class SignUpFormState extends State<SignUpForm>
                   builder: (context) => const Login(), 
                 ),
               );
-            } else {
+            } 
+            else 
+            {
               ScaffoldMessenger.of(context).showSnackBar
               (
                 const SnackBar
