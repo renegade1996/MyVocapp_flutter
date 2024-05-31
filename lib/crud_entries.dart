@@ -22,6 +22,7 @@ class CRUDEntries
       throw Exception('Error al obtener los diccionarios');
     }
   }
+  
   // Método para agregar una nueva entrada
   Future<Map<String, dynamic>> addEntry(Map<String, dynamic> entryData) async 
   {
@@ -59,6 +60,7 @@ class CRUDEntries
       throw Exception('Error al agregar la entrada');
     }
   }
+
   // Método para actualizar una entrada
   Future<void> updateEntry(Map<String, dynamic> entryData) async 
   {

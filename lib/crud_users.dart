@@ -162,14 +162,14 @@ class CRUDUsers
       } 
       else 
       {
-        print(response.body);
+        //print(response.body);
         return false; // Error en la actualización
       }
     } 
     catch (e) 
     {
       // Manejar cualquier error de conexión
-      print('Error updating password: $e');
+      //print('Error updating password: $e');
       return false;
     }
   }
