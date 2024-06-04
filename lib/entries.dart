@@ -362,7 +362,7 @@ class NewEntryDialogState extends State<NewEntryDialog>
         (
           onPressed: () 
           {
-            if (_wordController.text.isNotEmpty) 
+            if (_wordController.text.trim().isNotEmpty) 
             {
              // Lógica para guardar la entrada
               try 
