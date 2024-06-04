@@ -587,9 +587,29 @@ class EditEntryDialogState extends State<EditEntryDialog>
           {
             if(_wordController.text.trim().isNotEmpty)
             {
+              if (_isPlayable && _definitionController.text.trim() == "") 
+              {
+                ScaffoldMessenger.of(context).showSnackBar
+                (
+                  const SnackBar
+                  (
+                    content: Text("Entries without a definition or translation CANNOT be playable"),
+                  ),
+                );
+              } 
               _updateEntry().then((_) { widget.fillEntriesItems(); }); // método para edición y después actualizamos lista
+              Navigator.of(context).pop();
+            }
+            else 
+            {
+              ScaffoldMessenger.of(context).showSnackBar
+              (
+                const SnackBar
+                (
+                  content: Text("The 'Word or expression' field cannot be empty"),
+                ),
+              );
             }            
-            Navigator.of(context).pop();
           },
           child: const Text('Save'),
         ),
