@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class CRUDdictionaries 
 {
-  final String url = 'http://192.168.1.84/api_PI/diccionarios.php';
+  final String url = 'http://192.168.1.225/api_PI/diccionarios.php'; //'http://192.168.1.84/api_PI/diccionarios.php';
 
   // Método para obtener todos los diccionarios de un usuario concreto
   Future<List<dynamic>> getDictionaries(int userId) async 
@@ -81,7 +81,7 @@ class CRUDdictionaries
   // Método privado para eliminar todas las entradas asociadas a un diccionario
   Future<void> _deleteEntriesByDictionaryId(int dictionaryId) async 
   {
-    const entryUrl = 'http://192.168.1.84/api_PI/entradas.php';
+    const entryUrl = 'http://192.168.1.225/api_PI/entradas.php';// 'http://192.168.1.84/api_PI/entradas.php';
     final response = await http.delete(Uri.parse('$entryUrl/?idDiccionarioFK=$dictionaryId'));
 
     if (response.statusCode != 200) 

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class CRUDUsers 
 {
-  final String url = 'http://192.168.1.84/api_PI/';
+  final String url = 'http://192.168.1.225/api_PI/';//'http://192.168.1.84/api_PI/';
 
   // Método para verificar las credenciales
   Future<bool> verifyCredentials(String username, String password) async 
@@ -27,6 +27,27 @@ class CRUDUsers
     }
     return false;
   } 
+  
+  // Método para validar la contraseña actual del usuario
+  Future<bool> validatePassword(int userId, String password) async 
+  {
+    final response = await http.post
+    (
+      Uri.parse('$url/validate_password.php'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'idUsuario': userId, 'claveUsuario': password}),
+    );
+
+    if (response.statusCode == 200) 
+    {
+      final responseData = json.decode(response.body);
+      if (responseData.containsKey('valid') && responseData['valid'] == true) 
+      {
+        return true;
+      }
+    }
+    return false;
+  }
 
   // Método para crear un nuevo usuario si no existe ya ese nombre de usuario
   Future<bool> createUserIfNotExists(String username, String password) async 
@@ -106,9 +127,32 @@ class CRUDUsers
   {
     String currentUsername = await getCurrentUsername(userId);
 
+    // Normalizar el nuevo nombre de usuario
+    String normalizedNewUsername = newUsername.trim().toLowerCase().replaceAll(' ', '');
+
     // Verificar si el nuevo nombre de usuario es diferente del actual
-    if (currentUsername != newUsername.trim() && newUsername.isNotEmpty) 
+    if (currentUsername.trim().toLowerCase().replaceAll(' ', '') != normalizedNewUsername && newUsername.isNotEmpty) 
     {
+      // Verificar si el nuevo nombre de usuario ya existe
+      final checkResponse = await http.get
+      (
+        Uri.parse('$url/usuarios.php?nombreUsuario=$normalizedNewUsername'),
+        headers: {'Content-Type': 'application/json'},
+      );
+      
+      if (checkResponse.statusCode == 200) 
+      {
+        Map<String, dynamic> responseBody = jsonDecode(checkResponse.body);
+        if (responseBody['exists'] == true) 
+        {
+          return false; // El nombre de usuario ya existe
+        }
+      } 
+      else 
+      {
+        return false; // Error en la verificación del nombre de usuario
+      }
+
       // Intentar actualizar el nombre de usuario
       final updateResponse = await http.put
       (

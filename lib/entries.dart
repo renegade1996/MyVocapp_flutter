@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_flutter_app/crud_dictionaries.dart';
 import 'package:my_flutter_app/crud_entries.dart';
 import 'package:diacritic/diacritic.dart';
+import 'crud_users.dart';
 
 class Entries extends StatefulWidget 
 {

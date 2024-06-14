@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class CRUDEntries 
 {
-  final String url = 'http://192.168.1.84/api_PI/entradas.php';
+  final String url = 'http://192.168.1.225/api_PI/entradas.php';//'http://192.168.1.84/api_PI/entradas.php';
 
   // Método para obtener todas las entradas de un diccionario concreto
   Future<List<dynamic>> getEntries(int dictionaryId) async 

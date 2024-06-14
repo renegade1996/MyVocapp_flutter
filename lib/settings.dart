@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:my_flutter_app/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'crud_users.dart';
 
@@ -61,15 +60,34 @@ class AccountSettingsScreenState extends State<AccountSettingsScreen>
 
   Future<bool> showDialogToDelete() async 
   {
-    return await showDialog<bool>(
-
+    TextEditingController passwordController = TextEditingController();
+    bool confirmed = false;
+    return await showDialog<bool>
+    (
       context: context,
       builder: (BuildContext context) 
       {
         return AlertDialog
         (
           title: const Text('Do you want to delete your account?'),
-          content: const Text('You will lose ALL your dictionaries and entries forever.'),
+          content: Column
+          (
+            mainAxisSize: MainAxisSize.min,
+            children: 
+            [
+              const Text('You will lose ALL your dictionaries and entries forever.'),
+              TextField
+              (
+                controller: passwordController,
+                decoration: const InputDecoration
+                (
+                  labelText: 'Current Password',
+                  hintText: 'Enter your current password',
+                ),
+                obscureText: true,
+              ),
+            ],
+          ),
           actions: <Widget>
           [
             ElevatedButton
@@ -82,9 +100,39 @@ class AccountSettingsScreenState extends State<AccountSettingsScreen>
             ),
             ElevatedButton
             (
-              onPressed: () 
+              onPressed: () async 
               {
-                Navigator.of(context).pop(true); // Confirmar la eliminación
+                String password = passwordController.text.trim();
+                if (password.isNotEmpty) 
+                {
+                  bool passwordValid = await CRUDUsers().validatePassword(widget.userId, password);
+                  if (passwordValid) 
+                  {
+                    Navigator.of(context).pop(true); // Confirmar la eliminación
+                  } 
+                  else 
+                  {
+                    ScaffoldMessenger.of(context).showSnackBar
+                    (
+                      const SnackBar
+                      (
+                        content: Text('Incorrect password. Please try again.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                } 
+                else 
+                {
+                  ScaffoldMessenger.of(context).showSnackBar
+                  (
+                    const SnackBar
+                    (
+                      content: Text('Please enter your current password.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom
               (
@@ -168,7 +216,7 @@ class AccountSettingsScreenState extends State<AccountSettingsScreen>
                     (
                       SnackBar
                       (
-                        content: Text(success ? 'Username changed successfully!' : 'Failed to change username.'),
+                        content: Text(success ? 'Username changed successfully!' : 'That username is already in use. Please choose a different one.'),
                         duration: const Duration(seconds: 2),
                       ),
                     );
