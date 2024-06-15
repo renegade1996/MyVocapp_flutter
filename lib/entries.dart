@@ -203,6 +203,7 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
   // Método para mostrar el diálogo de eliminar DICCIONARIO
   void _showDeleteDictionaryDialog()
   {
+    TextEditingController passwordController = TextEditingController();
     showDialog
     (
       context: context,
@@ -210,8 +211,25 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
       {
         return AlertDialog
         (
-          title: const Text('Confirm Delete'),
-          content: const Text('This action will PERMANENTLY DELETE your dictionary AND all of its entries. Are you sure?'),
+          title: const Text('Do you want to delete your dictionary?'),
+          content: Column
+          (
+            mainAxisSize: MainAxisSize.min,
+            children: 
+            [
+              const Text('You will lose your dictionary and ALL of its entries forever.'),
+              TextField
+              (
+                controller: passwordController,
+                decoration: const InputDecoration
+                (
+                  labelText: 'Current Password',
+                  hintText: 'Enter your current password',
+                ),
+                obscureText: true,
+              ),
+            ],
+          ),
           actions: <Widget>
           [
             ElevatedButton
@@ -224,13 +242,49 @@ class EntriesState extends State<Entries> with TickerProviderStateMixin
             ),
             ElevatedButton
             (
-              onPressed: () 
+              onPressed: () async
               {
-                // borrar diccionario y entradas en la base de datos 
-                _deleteDictionary();
-
-                Navigator.of(context).pop(); // Cierra el segundo diálogo
-                Navigator.of(context).pop(); // Cierra el primer diálogo            
+                String password = passwordController.text.trim();
+                if (password.isNotEmpty) 
+                {
+                  bool passwordValid = await CRUDUsers().validatePassword(widget.userId, password);
+                  if (passwordValid) 
+                  {
+                    _deleteDictionary(); // borrar diccionario
+                    Navigator.of(context).pop(); // Cierra el segundo diálogo
+                    Navigator.of(context).pop(); // Cierra el primer diálogo   
+                    ScaffoldMessenger.of(context).showSnackBar
+                    (
+                      const SnackBar
+                      (
+                        content: Text('Your dictionary and its entries have been permanently deleted.'),
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
+                  } 
+                  else 
+                  {
+                    ScaffoldMessenger.of(context).showSnackBar
+                    (
+                      const SnackBar
+                      (
+                        content: Text('Incorrect password. Please try again.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                } 
+                else 
+                {
+                  ScaffoldMessenger.of(context).showSnackBar
+                  (
+                    const SnackBar
+                    (
+                      content: Text('Please enter your current password.'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }         
               },
               style: ElevatedButton.styleFrom
               (

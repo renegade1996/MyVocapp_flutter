@@ -61,7 +61,6 @@ class AccountSettingsScreenState extends State<AccountSettingsScreen>
   Future<bool> showDialogToDelete() async 
   {
     TextEditingController passwordController = TextEditingController();
-    bool confirmed = false;
     return await showDialog<bool>
     (
       context: context,
@@ -109,6 +108,14 @@ class AccountSettingsScreenState extends State<AccountSettingsScreen>
                   if (passwordValid) 
                   {
                     Navigator.of(context).pop(true); // Confirmar la eliminación
+                    ScaffoldMessenger.of(context).showSnackBar
+                    (
+                      const SnackBar
+                      (
+                        content: Text('Your account has been permanently deleted.'),
+                        duration: Duration(seconds: 4),
+                      ),
+                    );
                   } 
                   else 
                   {
