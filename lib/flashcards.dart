@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:my_flutter_app/crud_entries.dart';
@@ -96,12 +98,41 @@ class Flashcards extends StatefulWidget
 class FlashcardsState extends State<Flashcards> 
 {
   int _currentIndex = 0;
+  late List<Map<String, dynamic>> _shuffledFlashcards;
+
+  @override
+  void initState() 
+  {
+    super.initState();
+    _shuffledFlashcards = List.from(widget.flashcards);
+    _currentIndex = 0;
+  }
+
+  @override
+  void didUpdateWidget(covariant Flashcards oldWidget) 
+  {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.flashcards != widget.flashcards) 
+    {
+      _shuffledFlashcards = List.from(widget.flashcards);
+      _currentIndex = 0;
+    }
+  }
+
+  void _shuffleCards() 
+  {
+    setState(() 
+    {
+      _shuffledFlashcards.shuffle(Random());
+      _currentIndex = 0; // reinicia el index después de mezclar
+    });
+  }
 
   void _nextCard() 
   {
     setState(() 
     {
-      _currentIndex = (_currentIndex + 1) % widget.flashcards.length;
+      _currentIndex = (_currentIndex + 1) % _shuffledFlashcards.length;
     });
   }
 
@@ -109,14 +140,14 @@ class FlashcardsState extends State<Flashcards>
   {
     setState(() 
     {
-      _currentIndex = (_currentIndex - 1 + widget.flashcards.length) % widget.flashcards.length;
+      _currentIndex = (_currentIndex - 1 + _shuffledFlashcards.length) % _shuffledFlashcards.length;
     });
   }
 
   @override
   Widget build(BuildContext context) 
   {
-    final currentEntry = widget.flashcards.isNotEmpty ? widget.flashcards[_currentIndex] : null;
+    final currentEntry = _shuffledFlashcards.isNotEmpty ? _shuffledFlashcards[_currentIndex] : null;
 
     return Stack
     ( 
@@ -148,6 +179,11 @@ class FlashcardsState extends State<Flashcards>
                 (
                   onPressed: _nextCard,
                   child: const Text('Next'),
+                ),
+                ElevatedButton
+                (
+                  onPressed: _shuffleCards,
+                  child: const Text('Random'),
                 ),
               ],
             ),
@@ -238,7 +274,7 @@ class FlashcardsState extends State<Flashcards>
   void _showExampleSentenceDialog(String exampleText) 
   {
     // Verifica si el exampleText contiene la palabra que se muestra en la parte trasera de la flashcard
-    final currentEntry = widget.flashcards.isNotEmpty ? widget.flashcards[_currentIndex] : null;
+    final currentEntry = _shuffledFlashcards.isNotEmpty ? _shuffledFlashcards[_currentIndex] : null;
     final backText = currentEntry?['tituloEntrada'] ?? ''; // Texto en la parte trasera de la flashcard
 
     // Separa el texto de la parte trasera en palabras
