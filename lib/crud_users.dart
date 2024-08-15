@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class CRUDUsers 
 {
-  final String url = 'http://192.168.1.225/api_PI/';//'http://192.168.1.84/api_PI/';
+  final String url = 'http://your_IP/api_PI/';// add your IP
 
   // Método para verificar las credenciales
   Future<bool> verifyCredentials(String username, String password) async 
